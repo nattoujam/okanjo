@@ -179,4 +179,19 @@ RSpec.describe PaymentsController, type: :request do
       end
     end
   end
+
+  describe 'DELETE /g/:token/payments/:id' do
+    let!(:payment) { create(:payment, group: group, payer: member) }
+
+    subject { delete group_payment_path(group.token, payment) }
+
+    it '立替払いを削除する' do
+      expect { subject }.to change(Payment, :count).by(-1)
+    end
+
+    it 'グループ詳細画面にリダイレクトする' do
+      subject
+      expect(response).to redirect_to(group_show_path(group.token))
+    end
+  end
 end

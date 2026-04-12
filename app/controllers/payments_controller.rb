@@ -1,6 +1,6 @@
 class PaymentsController < ApplicationController
   before_action :set_group
-  before_action :set_payment, only: [ :edit, :update ]
+  before_action :set_payment, only: [ :edit, :update, :destroy ]
 
   def new
     @payment = Payment.new
@@ -19,6 +19,11 @@ class PaymentsController < ApplicationController
 
   def edit
     render :edit
+  end
+
+  def destroy
+    @payment.destroy
+    redirect_to group_show_path(@group.token)
   end
 
   def update

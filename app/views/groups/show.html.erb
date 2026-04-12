@@ -63,6 +63,11 @@
               <div class="text-right">
                 <p class="font-bold"><%= number_with_delimiter(payment.amount) %>円</p>
                 <a href="<%= edit_group_payment_path(@group.token, payment) %>" class="text-xs text-blue-500 hover:underline mt-1 inline-block">編集</a>
+                <%= button_to "削除",
+                    group_payment_path(@group.token, payment),
+                    method: :delete,
+                    class: "text-xs text-red-400 hover:text-red-600 mt-1",
+                    form: { data: { turbo_confirm: "「#{payment.description}」を削除しますか？" } } %>
               </div>
             </div>
           </li>
