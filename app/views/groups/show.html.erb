@@ -12,10 +12,10 @@
   </div>
 
   <div class="flex gap-2 mb-6">
-    <a href="#" class="flex-1 text-center py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 text-sm">
+    <a href="<%= new_group_payment_path(@group.token) %>" class="btn-primary flex-1 text-center">
       + 立替払いを追加
     </a>
-    <a href="#" class="flex-1 text-center py-2 border border-gray-300 rounded font-medium hover:bg-gray-50 text-sm">
+    <a href="#" class="btn-secondary flex-1 text-center">
       精算する
     </a>
   </div>

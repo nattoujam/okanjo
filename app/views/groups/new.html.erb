@@ -31,7 +31,7 @@
                class="flex-1 border rounded px-3 py-2 text-sm"
                data-member-form-target="nameInput" />
         <button type="button"
-                class="px-4 py-2 bg-gray-100 rounded text-sm hover:bg-gray-200"
+                class="btn-secondary"
                 data-action="click->member-form#addMember">
           追加
         </button>
@@ -41,7 +41,6 @@
       <div data-member-form-target="fields"></div>
     </div>
 
-    <%= f.submit "グループを作成する →",
-        class: "w-full py-3 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 cursor-pointer" %>
+    <%= f.submit "グループを作成する →", class: "btn-primary w-full py-3" %>
   <% end %>
 </div>

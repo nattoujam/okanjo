@@ -4,6 +4,8 @@ class Payment < ApplicationRecord
   has_many :payment_participants, dependent: :destroy
   has_many :participants, through: :payment_participants, source: :member
 
+  accepts_nested_attributes_for :payment_participants
+
   validates :description, presence: true
   validates :amount, presence: true, numericality: { greater_than: 0, only_integer: true }
   validate :participants_must_exist

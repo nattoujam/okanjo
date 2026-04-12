@@ -1,0 +1,59 @@
+<% content_for :title, "立替払いを追加 | Okanjo" %>
+
+<div class="w-full max-w-md mx-auto">
+  <div class="mb-6">
+    <a href="<%= group_show_path(@group.token) %>" class="text-sm text-gray-500 hover:text-gray-700">← <%= @group.name %></a>
+    <h1 class="text-2xl font-bold mt-2">立替払いを追加</h1>
+  </div>
+
+  <%= form_with model: @payment, url: group_payments_path(@group.token) do |f| %>
+    <% if @payment.errors.any? %>
+      <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+        <% @payment.errors.full_messages.each do |msg| %>
+          <p><%= msg %></p>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="mb-4">
+      <p class="block text-sm font-medium mb-2">立替えた人</p>
+      <div class="flex flex-wrap gap-3">
+        <% @group.members.each do |member| %>
+          <label class="flex items-center gap-1 cursor-pointer">
+            <%= radio_button_tag "payment[payer_member_id]", member.id,
+                @payment.payer_member_id == member.id,
+                class: "accent-blue-600" %>
+            <span class="text-sm"><%= member.name %></span>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <%= f.label :description, "内容", class: "block text-sm font-medium mb-1" %>
+      <%= f.text_field :description, class: "w-full border rounded px-3 py-2 text-sm", placeholder: "例: ランチ代" %>
+    </div>
+
+    <div class="mb-6">
+      <%= f.label :amount, "金額", class: "block text-sm font-medium mb-1" %>
+      <div class="flex items-center gap-2">
+        <%= f.number_field :amount, min: 1, class: "w-full border rounded px-3 py-2 text-sm", placeholder: "3000" %>
+        <span class="text-sm text-gray-500">円</span>
+      </div>
+    </div>
+
+    <div class="mb-6">
+      <p class="block text-sm font-medium mb-2">割り勘する人</p>
+      <div class="flex flex-wrap gap-3">
+        <% @group.members.each do |member| %>
+          <label class="flex items-center gap-1 cursor-pointer">
+            <%= check_box_tag "payment[member_ids][]", member.id, true, class: "accent-blue-600" %>
+            <span class="text-sm"><%= member.name %></span>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <%= f.submit "追加する", class: "btn-primary w-full py-3" %>
+  <% end %>
+</div>
