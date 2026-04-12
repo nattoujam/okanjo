@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_12_112215) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_12_132851) do
   create_table "groups", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "memo"
@@ -28,6 +28,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_12_112215) do
     t.index ["group_id"], name: "index_members_on_group_id"
   end
 
+  create_table "payment_participants", force: :cascade do |t|
+    t.integer "member_id", null: false
+    t.integer "payment_id", null: false
+    t.index ["member_id"], name: "index_payment_participants_on_member_id"
+    t.index ["payment_id", "member_id"], name: "index_payment_participants_on_payment_id_and_member_id", unique: true
+    t.index ["payment_id"], name: "index_payment_participants_on_payment_id"
+  end
+
   create_table "payments", force: :cascade do |t|
     t.integer "amount", null: false
     t.datetime "created_at", null: false
@@ -39,6 +47,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_12_112215) do
   end
 
   add_foreign_key "members", "groups"
+  add_foreign_key "payment_participants", "members"
+  add_foreign_key "payment_participants", "payments"
   add_foreign_key "payments", "groups"
   add_foreign_key "payments", "members", column: "payer_member_id"
 end

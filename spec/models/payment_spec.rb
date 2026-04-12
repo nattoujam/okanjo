@@ -57,6 +57,24 @@ RSpec.describe Payment, type: :model do
         it { is_expected.to be_invalid }
       end
     end
+
+    describe '#participants_must_exist' do
+      context 'payment_participantsが空のとき' do
+        subject do
+          payment = build(:payment)
+          payment.payment_participants.clear
+          payment
+        end
+
+        it { is_expected.to be_invalid }
+      end
+
+      context 'payment_participantsが存在するとき' do
+        subject { build(:payment, participants: [ create(:member) ]) }
+
+        it { is_expected.to be_valid }
+      end
+    end
   end
 
   describe 'associations' do
