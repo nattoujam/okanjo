@@ -6,9 +6,32 @@
     <% if @group.memo.present? %>
       <p class="text-sm text-gray-500 mt-1"><%= @group.memo %></p>
     <% end %>
-    <p class="text-sm text-gray-400 mt-1">
-      メンバー: <%= @group.members.map(&:name).join(", ") %>
-    </p>
+    <% if flash[:alert] %>
+      <p class="text-sm text-red-600 mt-2"><%= flash[:alert] %></p>
+    <% end %>
+  </div>
+
+  <div class="mb-6">
+    <p class="text-sm font-medium mb-2">メンバー</p>
+    <ul class="flex flex-wrap gap-2 mb-3">
+      <% @group.members.each do |member| %>
+        <li class="flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1 text-sm">
+          <%= member.name %>
+          <%= button_to "&times;".html_safe,
+              group_member_path(@group.token, member),
+              method: :delete,
+              class: "text-gray-400 hover:text-red-500 ml-1",
+              form: { data: { turbo_confirm: "#{member.name}を削除しますか？" } } %>
+        </li>
+      <% end %>
+    </ul>
+    <%= form_with url: group_members_path(@group.token), method: :post, class: "flex gap-2" do |f| %>
+      <%= f.text_field :name,
+          name: "member[name]",
+          placeholder: "名前",
+          class: "flex-1 border rounded px-3 py-2 text-sm" %>
+      <%= f.submit "追加", class: "btn-secondary" %>
+    <% end %>
   </div>
 
   <div class="flex gap-2 mb-6">

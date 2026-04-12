@@ -16,5 +16,6 @@ Rails.application.routes.draw do
   scope "/g/:token" do
     get "/", to: "groups#show", as: :group_show
     resources :payments, only: [ :new, :create ], as: :group_payments
+    resources :members, only: [ :create, :destroy ], as: :group_members
   end
 end
