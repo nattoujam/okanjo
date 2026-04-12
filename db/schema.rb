@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_12_092512) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_12_111102) do
   create_table "groups", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "memo"
@@ -19,4 +19,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_12_092512) do
     t.datetime "updated_at", null: false
     t.index ["token"], name: "index_groups_on_token", unique: true
   end
+
+  create_table "members", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "group_id", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["group_id"], name: "index_members_on_group_id"
+  end
+
+  add_foreign_key "members", "groups"
 end

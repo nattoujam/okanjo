@@ -1,4 +1,6 @@
 class Group < ApplicationRecord
+  has_many :members, dependent: :destroy
+
   before_validation :generate_token, on: :create
 
   validates :name, presence: true
