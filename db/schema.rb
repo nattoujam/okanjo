@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_12_111102) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_12_112215) do
   create_table "groups", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "memo"
@@ -28,5 +28,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_12_111102) do
     t.index ["group_id"], name: "index_members_on_group_id"
   end
 
+  create_table "payments", force: :cascade do |t|
+    t.integer "amount", null: false
+    t.datetime "created_at", null: false
+    t.string "description", null: false
+    t.integer "group_id", null: false
+    t.bigint "payer_member_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["group_id"], name: "index_payments_on_group_id"
+  end
+
   add_foreign_key "members", "groups"
+  add_foreign_key "payments", "groups"
+  add_foreign_key "payments", "members", column: "payer_member_id"
 end

@@ -1,5 +1,6 @@
 class Group < ApplicationRecord
   has_many :members, dependent: :destroy
+  has_many :payments, dependent: :destroy
 
   before_validation :generate_token, on: :create
 
