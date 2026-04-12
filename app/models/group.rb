@@ -2,6 +2,8 @@ class Group < ApplicationRecord
   has_many :members, dependent: :destroy
   has_many :payments, dependent: :destroy
 
+  accepts_nested_attributes_for :members, reject_if: :all_blank
+
   before_validation :generate_token, on: :create
 
   validates :name, presence: true

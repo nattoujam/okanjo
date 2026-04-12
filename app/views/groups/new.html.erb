@@ -1,0 +1,47 @@
+<% content_for :title, "グループを作成 | Okanjo" %>
+
+<div class="w-full max-w-md mx-auto">
+  <h1 class="text-2xl font-bold mb-6">グループを作成</h1>
+
+  <%= form_with model: @group, data: { controller: "member-form" } do |f| %>
+    <% if @group.errors.any? %>
+      <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+        <% @group.errors.full_messages.each do |msg| %>
+          <p><%= msg %></p>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="mb-4">
+      <%= f.label :name, "グループ名", class: "block text-sm font-medium mb-1" %>
+      <%= f.text_field :name, class: "w-full border rounded px-3 py-2 text-sm", placeholder: "例: GW京都旅行" %>
+    </div>
+
+    <div class="mb-6">
+      <%= f.label :memo, "メモ（任意）", class: "block text-sm font-medium mb-1" %>
+      <%= f.text_area :memo, rows: 2, class: "w-full border rounded px-3 py-2 text-sm", placeholder: "備考など" %>
+    </div>
+
+    <div class="mb-6">
+      <p class="text-sm font-medium mb-2">メンバーを追加</p>
+
+      <div class="flex gap-2 mb-3">
+        <input type="text"
+               placeholder="名前"
+               class="flex-1 border rounded px-3 py-2 text-sm"
+               data-member-form-target="nameInput" />
+        <button type="button"
+                class="px-4 py-2 bg-gray-100 rounded text-sm hover:bg-gray-200"
+                data-action="click->member-form#addMember">
+          追加
+        </button>
+      </div>
+
+      <ul class="space-y-1" data-member-form-target="memberList"></ul>
+      <div data-member-form-target="fields"></div>
+    </div>
+
+    <%= f.submit "グループを作成する →",
+        class: "w-full py-3 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 cursor-pointer" %>
+  <% end %>
+</div>
