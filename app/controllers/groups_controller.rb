@@ -1,6 +1,7 @@
 class GroupsController < ApplicationController
   def new
     @group = Group.new
+    render :new
   end
 
   def create
@@ -15,6 +16,7 @@ class GroupsController < ApplicationController
 
   def show
     @group = Group.includes(:members, payments: [ :payer, :payment_participants ]).find_by!(token: params[:token])
+    render :show
   end
 
   private

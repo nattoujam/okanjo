@@ -4,6 +4,7 @@ class PaymentsController < ApplicationController
 
   def new
     @payment = Payment.new
+    render :new
   end
 
   def create
@@ -17,6 +18,7 @@ class PaymentsController < ApplicationController
   end
 
   def edit
+    render :edit
   end
 
   def update
