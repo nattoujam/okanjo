@@ -12,4 +12,8 @@ Rails.application.routes.draw do
   root "home#index"
 
   resources :groups, only: [ :new, :create ]
+
+  scope "/g/:token" do
+    get "/", to: "groups#show", as: :group_show
+  end
 end

@@ -7,10 +7,14 @@ class GroupsController < ApplicationController
     @group = Group.new(group_params)
 
     if @group.save
-      redirect_to root_path # TODO: group_show_path(@group.token) に変更する
+      redirect_to group_show_path(@group.token)
     else
       render :new, status: :unprocessable_entity
     end
+  end
+
+  def show
+    @group = Group.includes(:members, payments: [ :payer, :payment_participants ]).find_by!(token: params[:token])
   end
 
   private

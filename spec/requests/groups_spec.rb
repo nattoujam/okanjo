@@ -18,9 +18,9 @@ RSpec.describe GroupsController, type: :request do
         expect { subject }.to change(Group, :count).by(1)
       end
 
-      it 'root_pathにリダイレクトする' do
+      it 'グループ詳細画面にリダイレクトする' do
         subject
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(group_show_path(Group.last.token))
       end
     end
 
@@ -52,6 +52,49 @@ RSpec.describe GroupsController, type: :request do
       it 'newをレンダリングして422を返す' do
         subject
         expect(response).to have_http_status(:unprocessable_content)
+      end
+    end
+  end
+
+  describe 'GET /g/:token' do
+    let(:group) { create(:group) }
+
+    subject { get group_show_path(group.token) }
+
+    it '200を返す' do
+      subject
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'グループ名を表示する' do
+      subject
+      expect(response.body).to include(group.name)
+    end
+
+    context 'メンバーがいる場合' do
+      let!(:member) { create(:member, group: group, name: '田中') }
+
+      it 'メンバー名を表示する' do
+        subject
+        expect(response.body).to include('田中')
+      end
+    end
+
+    context '立替払いがある場合' do
+      let!(:member) { create(:member, group: group) }
+      let!(:payment) { create(:payment, group: group, payer: member, description: 'ランチ代', amount: 3600) }
+
+      it '立替払いの内容と金額を表示する' do
+        subject
+        expect(response.body).to include('ランチ代')
+        expect(response.body).to include('3,600')
+      end
+    end
+
+    context '存在しないtokenの場合' do
+      it '404を返す' do
+        get group_show_path('nonexistent')
+        expect(response).to have_http_status(:not_found)
       end
     end
   end
