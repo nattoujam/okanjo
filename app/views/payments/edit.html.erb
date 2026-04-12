@@ -1,0 +1,10 @@
+<% content_for :title, "立替払いを編集 | Okanjo" %>
+
+<div class="w-full max-w-md mx-auto">
+  <div class="mb-6">
+    <a href="<%= group_show_path(@group.token) %>" class="text-sm text-gray-500 hover:text-gray-700">← <%= @group.name %></a>
+    <h1 class="text-2xl font-bold mt-2">立替払いを編集</h1>
+  </div>
+
+  <%= render "form", form_url: group_payment_path(@group.token, @payment), submit_label: "更新する" %>
+</div>
