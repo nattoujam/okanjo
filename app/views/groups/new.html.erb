@@ -43,4 +43,26 @@
 
     <%= f.submit "グループを作成する →", class: "btn-primary w-full py-3" %>
   <% end %>
+
+  <% if Rails.env.development? %>
+    <div class="mt-10 pt-6 border-t border-dashed border-gray-300">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">開発用サンプル</p>
+      <ul class="space-y-2">
+        <% [
+          { token: "seed-demo1", label: "GW京都旅行",    note: "精算あり（複雑）" },
+          { token: "seed-demo2", label: "忘年会",        note: "精算なし（均等割り）" },
+          { token: "seed-demo3", label: "ランチ割り勘",  note: "精算あり（シンプル）" },
+          { token: "seed-demo4", label: "計画中グループ", note: "精算なし（支払いゼロ）" },
+        ].each do |s| %>
+          <li class="flex items-center justify-between text-sm bg-gray-50 rounded px-3 py-2">
+            <span><%= s[:label] %> <span class="text-gray-400 text-xs">— <%= s[:note] %></span></span>
+            <div class="flex gap-3">
+              <a href="<%= group_show_path(s[:token]) %>" class="text-blue-500 hover:underline">詳細</a>
+              <a href="<%= group_settlements_path(s[:token]) %>" class="text-blue-500 hover:underline">精算</a>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
 </div>
