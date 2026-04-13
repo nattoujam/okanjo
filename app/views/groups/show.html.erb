@@ -11,6 +11,14 @@
     <% end %>
   </div>
 
+  <div data-controller="clipboard" class="mb-6">
+    <button data-clipboard-target="button"
+            data-action="click->clipboard#copy"
+            class="btn-secondary w-full">
+      URLをコピー
+    </button>
+  </div>
+
   <div class="mb-6">
     <p class="text-sm font-medium mb-2">メンバー</p>
     <ul class="flex flex-wrap gap-2 mb-3">
