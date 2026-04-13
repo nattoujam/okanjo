@@ -5,8 +5,20 @@ FactoryBot.define do
     description { 'ランチ代' }
     amount { 3000 }
 
-    after(:build) do |payment|
-      payment.payment_participants.build(member: payment.payer)
+    transient do
+      participants { [] }
+    end
+
+    after(:build) do |payment, evaluator|
+      evaluator.participants.each do |member|
+        payment.payment_participants.build(member: member)
+      end
+    end
+
+    trait :with_participant do
+      after(:build) do |payment|
+        payment.payment_participants.build(member: payment.payer)
+      end
     end
   end
 end

@@ -89,7 +89,7 @@ RSpec.describe PaymentsController, type: :request do
   end
 
   describe 'GET /g/:token/payments/:id/edit' do
-    let(:payment) { create(:payment, group: group, payer: member) }
+    let(:payment) { create(:payment, :with_participant, group: group, payer: member) }
 
     subject { get edit_group_payment_path(group.token, payment) }
 
@@ -105,7 +105,7 @@ RSpec.describe PaymentsController, type: :request do
   end
 
   describe 'PATCH /g/:token/payments/:id' do
-    let!(:payment) { create(:payment, group: group, payer: member, description: 'ランチ代', amount: 3600) }
+    let!(:payment) { create(:payment, :with_participant, group: group, payer: member, description: 'ランチ代', amount: 3600) }
 
     subject { patch group_payment_path(group.token, payment), params: params }
 
@@ -181,7 +181,7 @@ RSpec.describe PaymentsController, type: :request do
   end
 
   describe 'DELETE /g/:token/payments/:id' do
-    let!(:payment) { create(:payment, group: group, payer: member) }
+    let!(:payment) { create(:payment, :with_participant, group: group, payer: member) }
 
     subject { delete group_payment_path(group.token, payment) }
 

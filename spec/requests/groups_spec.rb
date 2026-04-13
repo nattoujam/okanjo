@@ -82,7 +82,7 @@ RSpec.describe GroupsController, type: :request do
 
     context '立替払いがある場合' do
       let!(:member) { create(:member, group: group) }
-      let!(:payment) { create(:payment, group: group, payer: member, description: 'ランチ代', amount: 3600) }
+      let!(:payment) { create(:payment, :with_participant, group: group, payer: member, description: 'ランチ代', amount: 3600) }
 
       it '立替払いの内容と金額を表示する' do
         subject

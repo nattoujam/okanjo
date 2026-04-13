@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe Payment, type: :model do
   describe 'validations' do
     describe 'description' do
-      subject { build(:payment, description: description) }
+      subject { build(:payment, :with_participant, description: description) }
 
       context 'バリデーション通過' do
         let(:description) { 'ランチ代' }
@@ -25,7 +25,7 @@ RSpec.describe Payment, type: :model do
     end
 
     describe 'amount' do
-      subject { build(:payment, amount: amount) }
+      subject { build(:payment, :with_participant, amount: amount) }
 
       context 'バリデーション通過' do
         let(:amount) { 1000 }
