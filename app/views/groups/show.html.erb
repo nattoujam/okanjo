@@ -38,7 +38,7 @@
     <a href="<%= new_group_payment_path(@group.token) %>" class="btn-primary flex-1 text-center">
       + 立替払いを追加
     </a>
-    <a href="#" class="btn-secondary flex-1 text-center">
+    <a href="<%= group_settlements_path(@group.token) %>" class="btn-secondary flex-1 text-center">
       精算する
     </a>
   </div>

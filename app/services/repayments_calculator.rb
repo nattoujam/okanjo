@@ -3,9 +3,12 @@ class RepaymentsCalculator
     @group = group
   end
 
-  def call
-    balances = calculate_balances
+  def repayments
     calculate_repayments(balances)
+  end
+
+  def balances
+    calculate_balances
   end
 
   private
