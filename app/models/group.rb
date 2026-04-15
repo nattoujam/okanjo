@@ -16,6 +16,6 @@ class Group < ApplicationRecord
   private
 
   def generate_token
-    self.token ||= SecureRandom.urlsafe_base64(8)
+    self.token ||= SecureRandom.urlsafe_base64(16)
   end
 end
