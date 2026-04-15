@@ -1,24 +1,32 @@
-# README
+# warikan
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## 動作環境
 
-Things you may want to cover:
+- Ruby 4.0.2
+- SQLite3
 
-* Ruby version
+## セットアップ & 起動
 
-* System dependencies
+### 初回 / 環境リセット時
 
-* Configuration
+依存パッケージのインストール、DBの準備、サーバー起動をまとめて行います。
 
-* Database creation
+```sh
+bin/setup
+```
 
-* Database initialization
+DBをリセットしたい場合:
 
-* How to run the test suite
+```sh
+bin/setup --reset
+```
 
-* Services (job queues, cache servers, search engines, etc.)
+### 2回目以降
 
-* Deployment instructions
+```sh
+bin/dev
+```
 
-* ...
+Rails サーバーと Tailwind CSS の watch が同時に起動します。
+
+ブラウザで http://localhost:3000 を開いてください。
