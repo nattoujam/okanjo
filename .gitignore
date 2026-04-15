@@ -38,5 +38,4 @@
 !/app/assets/builds/.keep
 
 docs
-config/deploy.yml
 .kamal/secrets
