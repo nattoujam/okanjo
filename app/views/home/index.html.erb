@@ -1,0 +1,67 @@
+<% content_for :title, "Okanjo — かんたん割り勘" %>
+
+<div class="w-full max-w-lg mx-auto">
+
+  <%# Hero %>
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold tracking-tight mb-3">okanjo</h1>
+    <p class="text-gray-500 text-base leading-relaxed">
+      旅行・イベントの割り勘を<br class="sm:hidden">かんたんに管理。<br>
+      会員登録なし、URLをシェアするだけ。
+    </p>
+  </div>
+
+  <%# Features %>
+  <ul class="grid grid-cols-3 gap-4 mb-12 text-center">
+    <li class="bg-gray-50 rounded-xl p-4">
+      <div class="text-2xl mb-2">👤</div>
+      <p class="text-xs font-medium text-gray-600">登録不要</p>
+      <p class="text-xs text-gray-400 mt-1">URLをシェアするだけで誰でも参加</p>
+    </li>
+    <li class="bg-gray-50 rounded-xl p-4">
+      <div class="text-2xl mb-2">💸</div>
+      <p class="text-xs font-medium text-gray-600">精算を最適化</p>
+      <p class="text-xs text-gray-400 mt-1">支払い回数が最少になるよう計算</p>
+    </li>
+    <li class="bg-gray-50 rounded-xl p-4">
+      <div class="text-2xl mb-2">🎯</div>
+      <p class="text-xs font-medium text-gray-600">対象者を指定</p>
+      <p class="text-xs text-gray-400 mt-1">一部メンバーだけの支払いも管理</p>
+    </li>
+  </ul>
+
+  <%# CTA %>
+  <div class="text-center">
+    <%= link_to "グループを作成する →", new_group_path, class: "btn-primary text-base px-8 py-3 inline-block" %>
+    <p class="text-xs text-gray-400 mt-4">無料・会員登録なしで今すぐ使えます</p>
+  </div>
+
+  <%# How it works %>
+  <div class="mt-16 border-t pt-10">
+    <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide text-center mb-6">使い方</h2>
+    <ol class="space-y-4">
+      <li class="flex items-start gap-4">
+        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">1</span>
+        <div>
+          <p class="font-medium text-sm">グループを作成</p>
+          <p class="text-xs text-gray-400 mt-0.5">グループ名とメンバーを入力するだけ</p>
+        </div>
+      </li>
+      <li class="flex items-start gap-4">
+        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">2</span>
+        <div>
+          <p class="font-medium text-sm">URLをシェア &amp; 立替払いを記録</p>
+          <p class="text-xs text-gray-400 mt-0.5">誰が何をいくら払ったか入力していく</p>
+        </div>
+      </li>
+      <li class="flex items-start gap-4">
+        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">3</span>
+        <div>
+          <p class="font-medium text-sm">精算結果を確認</p>
+          <p class="text-xs text-gray-400 mt-0.5">誰が誰にいくら払えばいいか一発でわかる</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+</div>
