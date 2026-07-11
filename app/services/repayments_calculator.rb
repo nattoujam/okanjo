@@ -19,9 +19,9 @@ class RepaymentsCalculator
 
     @group.payments.each do |payment|
       participants = payment.payment_participants
-      share = payment.amount.to_f / participants.count
+      share = payment.split_amount.to_f / participants.count
 
-      balances[payment.payer_member_id] += payment.amount
+      balances[payment.payer_member_id] += payment.split_amount
 
       participants.each do |pp|
         balances[pp.member_id] -= share

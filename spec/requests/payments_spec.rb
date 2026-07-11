@@ -86,6 +86,48 @@ RSpec.describe PaymentsController, type: :request do
         expect(response).to have_http_status(:unprocessable_content)
       end
     end
+
+    context '自分用の金額（personal_amount）を指定した場合' do
+      let(:params) do
+        {
+          payment: {
+            payer_member_id: member.id,
+            description: 'スーパー',
+            amount: 3600,
+            personal_amount: 600,
+            member_ids: [ member.id ]
+          }
+        }
+      end
+
+      it '立替払いを作成する' do
+        expect { subject }.to change(Payment, :count).by(1)
+        expect(Payment.last.personal_amount).to eq(600)
+      end
+    end
+
+    context '自分用の金額が支払い金額以上の場合' do
+      let(:params) do
+        {
+          payment: {
+            payer_member_id: member.id,
+            description: 'スーパー',
+            amount: 3600,
+            personal_amount: 3600,
+            member_ids: [ member.id ]
+          }
+        }
+      end
+
+      it '立替払いを作成しない' do
+        expect { subject }.not_to change(Payment, :count)
+      end
+
+      it 'newをレンダリングして422を返す' do
+        subject
+        expect(response).to have_http_status(:unprocessable_content)
+      end
+    end
   end
 
   describe 'GET /g/:token/payments/:id/edit' do
@@ -176,6 +218,25 @@ RSpec.describe PaymentsController, type: :request do
       it 'editをレンダリングして422を返す' do
         subject
         expect(response).to have_http_status(:unprocessable_content)
+      end
+    end
+
+    context '自分用の金額（personal_amount）を指定した場合' do
+      let(:params) do
+        {
+          payment: {
+            payer_member_id: member.id,
+            description: '夕食代',
+            amount: 5000,
+            personal_amount: 1000,
+            member_ids: [ member.id ]
+          }
+        }
+      end
+
+      it '立替払いを更新する' do
+        subject
+        expect(payment.reload.personal_amount).to eq(1000)
       end
     end
   end

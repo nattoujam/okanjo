@@ -35,6 +35,15 @@
   </div>
 
   <div class="mb-6">
+    <%= f.label :personal_amount, "自分用の金額（精算対象外・任意）", class: "block text-sm font-medium mb-1" %>
+    <div class="flex items-center gap-2">
+      <%= f.number_field :personal_amount, min: 0, value: @payment.personal_amount || 0, class: "w-full border rounded px-3 py-2 text-sm", placeholder: "0" %>
+      <span class="text-sm text-gray-500">円</span>
+    </div>
+    <p class="text-xs text-gray-400 mt-1">ついでに自分用のものを買った場合など、割り勘から除きたい金額を入力してください</p>
+  </div>
+
+  <div class="mb-6">
     <p class="block text-sm font-medium mb-2">割り勘する人</p>
     <div class="flex flex-wrap gap-3">
       <% @group.members.each do |member| %>

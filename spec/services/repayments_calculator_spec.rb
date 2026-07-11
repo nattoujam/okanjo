@@ -221,6 +221,21 @@ RSpec.describe RepaymentsCalculator do
       end
     end
 
+    context '自分用の金額（personal_amount）が含まれる場合' do
+      # 田中がスーパーで3000円立替え、うち600円は自分用（精算対象外）
+      # 精算対象額2400円を田中・鈴木の2人で割り勘（各自1200円負担）
+      # 田中: +2400 - 1200 = +1200, 鈴木: -1200
+      before do
+        create(:payment, group: group, payer: tanaka, amount: 3000, personal_amount: 600,
+               participants: [ tanaka, suzuki ])
+      end
+
+      it '精算が1件で鈴木が田中に1200円払う（自分用の金額は計算対象外）' do
+        expect(subject.size).to eq(1)
+        is_expected.to include({ from: suzuki.id, to: tanaka.id, amount: 1200 })
+      end
+    end
+
     context '3人グループで全員が均等に立替えている場合' do
       # 3人がそれぞれ3000円を3人全員のために立替え
       # 全員の収支: +3000 - 3000 = 0
@@ -266,6 +281,22 @@ RSpec.describe RepaymentsCalculator do
         expect(subject[tanaka.id]).to eq(0)
         expect(subject[suzuki.id]).to eq(0)
         expect(subject[sato.id]).to eq(0)
+      end
+    end
+
+    context '自分用の金額（personal_amount）が含まれる場合' do
+      # 佐藤が3600円立替え、うち600円は自分用（精算対象外）
+      # 精算対象額3000円を3人で割り勘（各自1000円負担）
+      # 佐藤: +3000 - 1000 = +2000, 田中: -1000, 鈴木: -1000
+      before do
+        create(:payment, group: group, payer: sato, amount: 3600, personal_amount: 600,
+               participants: [ sato, tanaka, suzuki ])
+      end
+
+      it do
+        expect(subject[sato.id]).to eq(2000)
+        expect(subject[tanaka.id]).to eq(-1000)
+        expect(subject[suzuki.id]).to eq(-1000)
       end
     end
   end

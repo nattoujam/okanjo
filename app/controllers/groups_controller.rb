@@ -1,6 +1,7 @@
 class GroupsController < ApplicationController
   def new
     @group = Group.new
+    @groups = Group.order(:id) if Rails.env.development?
     render :new
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_12_132851) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_11_161538) do
   create_table "groups", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "memo"
@@ -42,6 +42,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_12_132851) do
     t.string "description", null: false
     t.integer "group_id", null: false
     t.bigint "payer_member_id", null: false
+    t.integer "personal_amount", default: 0, null: false
     t.datetime "updated_at", null: false
     t.index ["group_id"], name: "index_payments_on_group_id"
   end

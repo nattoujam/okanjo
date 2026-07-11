@@ -2,8 +2,8 @@
 # development, test). The code here should be idempotent so that it can be executed at any point in every environment.
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
 
-def create_payment(group:, payer:, description:, amount:, participants:)
-  payment = group.payments.build(payer: payer, description: description, amount: amount)
+def create_payment(group:, payer:, description:, amount:, participants:, personal_amount: 0)
+  payment = group.payments.build(payer: payer, description: description, amount: amount, personal_amount: personal_amount)
   participants.each { |m| payment.payment_participants.build(member: m) }
   payment.save!
 end
@@ -82,4 +82,20 @@ if group5.payments.empty?
 
   create_payment(group: group5, payer: a, description: "AグループのランチA", amount: 1_100, participants: [ a, b, c ])
   create_payment(group: group5, payer: d, description: "DグループのランチD", amount: 1_100, participants: [ d, e, f ])
+end
+
+# -------------------------------------------------------------------
+# パターン6: 自分用の金額あり（スーパーでのついで買いを精算対象外にするケース）
+# -------------------------------------------------------------------
+# 田中がスーパーで5,000円立替え、うち800円は自分用の買い物（精算対象外）
+# 精算対象額は4,200円 → 鈴木・佐藤が田中にそれぞれ1,400円払う
+group6 = Group.find_or_create_by!(token: "seed-demo6", name: "自炊旅行", memo: "自分用の金額あり（スーパーのついで買い）")
+
+if group6.payments.empty?
+  tanaka = group6.members.find_or_create_by!(name: "田中")
+  suzuki = group6.members.find_or_create_by!(name: "鈴木")
+  sato   = group6.members.find_or_create_by!(name: "佐藤")
+
+  create_payment(group: group6, payer: tanaka, description: "スーパーでの買い出し", amount: 5_000,
+                 personal_amount: 800, participants: [ tanaka, suzuki, sato ])
 end

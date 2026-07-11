@@ -56,11 +56,11 @@ class PaymentsController < ApplicationController
   end
 
   def payment_base_params
-    params.require(:payment).permit(:payer_member_id, :description, :amount)
+    params.require(:payment).permit(:payer_member_id, :description, :amount, :personal_amount)
   end
 
   def payment_params
-    params.require(:payment).permit(:payer_member_id, :description, :amount, member_ids: [])
+    params.require(:payment).permit(:payer_member_id, :description, :amount, :personal_amount, member_ids: [])
       .then { |p| build_payment_params(p) }
   end
 

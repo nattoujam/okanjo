@@ -58,6 +58,43 @@ RSpec.describe Payment, type: :model do
       end
     end
 
+    describe 'personal_amount' do
+      subject { build(:payment, :with_participant, amount: 1000, personal_amount: personal_amount) }
+
+      context 'バリデーション通過' do
+        let(:personal_amount) { 300 }
+
+        it { is_expected.to be_valid }
+      end
+
+      context 'personal_amountがnilのとき' do
+        let(:personal_amount) { nil }
+
+        it '0として扱われる' do
+          subject.valid?
+          expect(subject.personal_amount).to eq(0)
+        end
+      end
+
+      context 'personal_amountが負のとき' do
+        let(:personal_amount) { -1 }
+
+        it { is_expected.to be_invalid }
+      end
+
+      context 'personal_amountがamountと同額のとき' do
+        let(:personal_amount) { 1000 }
+
+        it { is_expected.to be_invalid }
+      end
+
+      context 'personal_amountがamountを超えるとき' do
+        let(:personal_amount) { 1001 }
+
+        it { is_expected.to be_invalid }
+      end
+    end
+
     describe '#participants_must_exist' do
       context 'payment_participantsが空のとき' do
         subject do
@@ -74,6 +111,14 @@ RSpec.describe Payment, type: :model do
 
         it { is_expected.to be_valid }
       end
+    end
+  end
+
+  describe '#split_amount' do
+    subject { build(:payment, :with_participant, amount: 1000, personal_amount: 300) }
+
+    it '自分用の金額を除いた精算対象額を返す' do
+      expect(subject.split_amount).to eq(700)
     end
   end
 
