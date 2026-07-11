@@ -6,6 +6,7 @@ RSpec.describe RepaymentsCalculator do
   let(:suzuki) { create(:member, group: group, name: '鈴木') }
   let(:sato)   { create(:member, group: group, name: '佐藤') }
   let(:ito)    { create(:member, group: group, name: '伊藤') }
+  let(:kato)   { create(:member, group: group, name: '加藤') }
 
   describe '#repayments' do
     subject { described_class.new(group).repayments }
@@ -200,6 +201,23 @@ RSpec.describe RepaymentsCalculator do
         is_expected.to include({ from: sato.id, to: tanaka.id, amount: 1250 })
         is_expected.to include({ from: ito.id,  to: tanaka.id, amount: 1000 })
         is_expected.to include({ from: ito.id,  to: suzuki.id, amount: 250 })
+      end
+    end
+
+    context 'greedy法では最適解が出ないケース（独立した2グループが存在）' do
+      # {田中, 鈴木, 佐藤} と {伊藤, 加藤} が独立した精算グループ
+      # greedy法: 4件（鈴木→田中:4000 等, 不最適）
+      # 最適解:   3件（鈴木→田中:3000, 佐藤→田中:3000, 加藤→伊藤:4000）
+      before do
+        create(:payment, group: group, payer: tanaka, amount: 6000, participants: [ suzuki, sato ])
+        create(:payment, group: group, payer: ito,    amount: 4000, participants: [ kato ])
+      end
+
+      it '精算が3件で済む' do
+        expect(subject.size).to eq(3)
+        is_expected.to include({ from: suzuki.id, to: tanaka.id, amount: 3000 })
+        is_expected.to include({ from: sato.id,   to: tanaka.id, amount: 3000 })
+        is_expected.to include({ from: kato.id,   to: ito.id,   amount: 4000 })
       end
     end
 

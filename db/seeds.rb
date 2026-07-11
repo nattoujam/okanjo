@@ -60,3 +60,26 @@ group4 = Group.find_or_create_by!(token: "seed-demo4", name: "計画中グルー
 if group4.members.empty?
   group4.members.create!([ { name: "田中" }, { name: "鈴木" }, { name: "佐藤" } ])
 end
+
+# -------------------------------------------------------------------
+# パターン5: 端数あり（1100円÷3人 × 独立2グループ）
+# -------------------------------------------------------------------
+# A が A, B, C 分を 1100円立替 → 1人あたり 366.666... 円
+# D が D, E, F 分を 1100円立替 → 1人あたり 366.666... 円
+# {A,B,C} と {D,E,F} は独立した精算グループ
+# greedy: 4件（{A,B,C} と {D,E,F} を混在させる可能性あり）
+# optimal: 4件（独立を保つ）
+# -------------------------------------------------------------------
+group5 = Group.find_or_create_by!(token: "seed-demo5", name: "端数テスト", memo: "1100円÷3人 × 独立2グループ")
+
+if group5.payments.empty?
+  a = group5.members.find_or_create_by!(name: "A")
+  b = group5.members.find_or_create_by!(name: "B")
+  c = group5.members.find_or_create_by!(name: "C")
+  d = group5.members.find_or_create_by!(name: "D")
+  e = group5.members.find_or_create_by!(name: "E")
+  f = group5.members.find_or_create_by!(name: "F")
+
+  create_payment(group: group5, payer: a, description: "AグループのランチA", amount: 1_100, participants: [ a, b, c ])
+  create_payment(group: group5, payer: d, description: "DグループのランチD", amount: 1_100, participants: [ d, e, f ])
+end
