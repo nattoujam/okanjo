@@ -1,0 +1,122 @@
+name: Bump and Push
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      version:
+        description: "Explicit version (e.g. 1.2.3) — overrides bump type if set"
+        required: false
+        type: string
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    outputs:
+      version: ${{ steps.ver.outputs.next }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Compute next version
+        id: ver
+        env:
+          BUMP: ${{ inputs.bump }}
+          EXPLICIT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ -n "$EXPLICIT_VERSION" ]; then
+            NEXT="$EXPLICIT_VERSION"
+          else
+            CURRENT=$(git tag --list 'v*' --sort=-v:refname | head -1 | sed 's/^v//')
+            CURRENT="${CURRENT:-0.0.0}"
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+            case "$BUMP" in
+              major) NEXT="$((MAJOR+1)).0.0" ;;
+              minor) NEXT="${MAJOR}.$((MINOR+1)).0" ;;
+              patch) NEXT="${MAJOR}.${MINOR}.$((PATCH+1))" ;;
+            esac
+          fi
+          if ! echo "$NEXT" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::バージョンは X.Y.Z 形式で指定してください: ${NEXT}"
+            exit 1
+          fi
+          if git rev-parse "v${NEXT}" >/dev/null 2>&1; then
+            echo "::error::タグ v${NEXT} は既に存在します"
+            exit 1
+          fi
+          echo "next=${NEXT}" >> "$GITHUB_OUTPUT"
+          echo "Next version: ${NEXT}"
+
+      - name: Tag
+        env:
+          NEXT: ${{ steps.ver.outputs.next }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "v${NEXT}"
+          git push origin "v${NEXT}"
+
+  push:
+    needs: bump
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: v${{ needs.bump.outputs.version }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=v${{ needs.bump.outputs.version }}
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

@@ -1,5 +1,7 @@
 # okanjo
 
+![version](https://img.shields.io/github/v/tag/nattoujam/okanjo?label=version&color=blue&sort=semver)
+
 ## 動作環境
 
 - Ruby 4.0.2
@@ -30,14 +32,3 @@ bin/dev
 Rails サーバーと Tailwind CSS の watch が同時に起動します。
 
 ブラウザで http://localhost:3000 を開いてください。
-
-## デプロイ
-
-Docker Compose を使います。
-
-```sh
-RAILS_MASTER_KEY=$(cat config/master.key) docker compose up -d --build
-```
-
-DBファイルは `okanjo_storage` ボリュームに永続化されます。公開ポートは `APP_PORT`
-で変更できます (既定は 80)。
