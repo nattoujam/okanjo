@@ -5,8 +5,23 @@ updates:
   schedule:
     interval: weekly
   open-pull-requests-limit: 10
+  # minor/patch は 1 つの PR にまとめる。major は破壊的変更を含みやすいので個別 PR にする。
+  groups:
+    bundler:
+      patterns:
+      - "*"
+      update-types:
+      - "minor"
+      - "patch"
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
     interval: weekly
   open-pull-requests-limit: 10
+  groups:
+    github-actions:
+      patterns:
+      - "*"
+      update-types:
+      - "minor"
+      - "patch"
