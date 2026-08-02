@@ -33,61 +33,11 @@ Rails サーバーと Tailwind CSS の watch が同時に起動します。
 
 ## デプロイ
 
-[Kamal](https://kamal-deploy.org/) を使ってデプロイします。
-
-### 事前準備
-
-#### direnvのセットアップ
-
-環境変数の管理に [direnv](https://direnv.net/) を使用します。
+Docker Compose を使います。
 
 ```sh
-sudo apt install direnv
-echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc  # bash の場合は hook bash
-source ~/.zshrc
-direnv allow  # プロジェクトディレクトリで実行
+RAILS_MASTER_KEY=$(cat config/master.key) docker compose up -d --build
 ```
 
-#### シークレット・設定ファイルの作成
-
-`.kamal/secrets` にシークレットを設定する
-
-```
-RAILS_MASTER_KEY=<config/master.keyの内容>
-KAMAL_REGISTRY_PASSWORD=<Docker Hubのアクセストークン>
-```
-
-`.env.deploy` にdeploy設定を記述する
-
-```
-DOCKER_USERNAME=<Docker Hubのユーザー名>
-DOCKER_IMAGE=<Docker Hubのイメージ名>
-PROXY_HOST=<公開ホスト名 (例: example.com)>
-DEPLOY_SERVER=<デプロイ先サーバーのIPアドレス>
-SSH_PROXY=<SSHプロキシ (user@host形式)>
-SSH_USER=<SSHユーザー名>
-SSH_KEY_PATH=<SSH秘密鍵のパス>
-```
-
-### 初回デプロイ
-
-サーバーへのDockerインストールとアプリのセットアップをまとめて行います。
-
-```sh
-bin/kamal setup
-```
-
-### 2回目以降
-
-```sh
-bin/kamal deploy
-```
-
-### 便利なエイリアス
-
-```sh
-bin/kamal console  # Rails コンソール
-bin/kamal shell    # サーバー上でbash
-bin/kamal logs     # ログをtail
-bin/kamal dbc      # Rails dbconsole
-```
+DBファイルは `okanjo_storage` ボリュームに永続化されます。公開ポートは `APP_PORT`
+で変更できます (既定は 80)。
