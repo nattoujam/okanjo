@@ -21,6 +21,21 @@
     </div>
   </div>
 
+  <div class="mb-4" data-controller="category-select">
+    <%= f.label :payment_category_id, "カテゴリ（任意）", class: "block text-sm font-medium mb-1" %>
+    <%= f.select :payment_category_id,
+        @group.payment_categories.map { |category| [ category.name, category.id ] } +
+          [ [ "+ 新しいカテゴリ", PaymentsController::NEW_CATEGORY ] ],
+        { include_blank: "未分類", selected: selected_category_value(@payment) },
+        class: "w-full border rounded px-3 py-2 text-sm",
+        data: { category_select_target: "select", action: "change->category-select#toggle" } %>
+    <%= text_field_tag "payment[new_category_name]", new_category_name(@payment),
+        placeholder: "例: 1日目",
+        class: "w-full border rounded px-3 py-2 text-sm mt-2",
+        data: { category_select_target: "newName" } %>
+    <p class="text-xs text-gray-400 mt-1">旅行の「1日目」やイベントの「食料費」など、立替払いをまとめる単位です</p>
+  </div>
+
   <div class="mb-4">
     <%= f.label :description, "内容", class: "block text-sm font-medium mb-1" %>
     <%= f.text_field :description, class: "w-full border rounded px-3 py-2 text-sm", placeholder: "例: ランチ代" %>

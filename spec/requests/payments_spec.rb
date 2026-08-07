@@ -19,6 +19,10 @@ RSpec.describe PaymentsController, type: :request do
   end
 
   describe 'POST /g/:token/payments' do
+    let(:valid_attributes) do
+      { payer_member_id: member.id, description: 'ランチ代', amount: 3600, member_ids: [ member.id ] }
+    end
+
     subject { post group_payments_path(group.token), params: params }
 
     context '有効なパラメータの場合' do
@@ -126,6 +130,77 @@ RSpec.describe PaymentsController, type: :request do
       it 'newをレンダリングして422を返す' do
         subject
         expect(response).to have_http_status(:unprocessable_content)
+      end
+    end
+
+    context '既存のカテゴリを選択した場合' do
+      let!(:category) { create(:payment_category, group: group) }
+      let(:params) { { payment: valid_attributes.merge(payment_category_id: category.id) } }
+
+      it 'カテゴリを新規作成せずに紐づける' do
+        expect { subject }.not_to change(PaymentCategory, :count)
+        expect(Payment.last.category).to eq(category)
+      end
+    end
+
+    context '他の割り勘グループのカテゴリを指定した場合' do
+      let(:other_category) { create(:payment_category, group: create(:group)) }
+      let(:params) { { payment: valid_attributes.merge(payment_category_id: other_category.id) } }
+
+      it '未分類として作成する' do
+        subject
+        expect(Payment.last.category).to be_nil
+      end
+    end
+
+    context '新しいカテゴリ名を入力した場合' do
+      let(:params) do
+        { payment: valid_attributes.merge(payment_category_id: PaymentsController::NEW_CATEGORY, new_category_name: ' 1日目 ') }
+      end
+
+      it 'カテゴリを作成して紐づける' do
+        expect { subject }.to change(PaymentCategory, :count).by(1)
+        expect(Payment.last.category.name).to eq('1日目')
+      end
+    end
+
+    context '新しいカテゴリを選んだが名前が空の場合' do
+      let(:params) do
+        { payment: valid_attributes.merge(payment_category_id: PaymentsController::NEW_CATEGORY, new_category_name: '  ') }
+      end
+
+      it '未分類として作成する' do
+        expect { subject }.not_to change(PaymentCategory, :count)
+        expect(Payment.last.category).to be_nil
+      end
+    end
+
+    context '新しいカテゴリ名が既存のカテゴリと同名の場合' do
+      let!(:category) { create(:payment_category, group: group, name: '1日目') }
+      let(:params) do
+        { payment: valid_attributes.merge(payment_category_id: PaymentsController::NEW_CATEGORY, new_category_name: '1日目') }
+      end
+
+      it '既存のカテゴリを再利用する' do
+        expect { subject }.not_to change(PaymentCategory, :count)
+        expect(Payment.last.category).to eq(category)
+      end
+    end
+
+    context '新しいカテゴリ名を入力したが立替払いが無効な場合' do
+      let(:params) do
+        {
+          payment: valid_attributes.merge(
+            description: '',
+            payment_category_id: PaymentsController::NEW_CATEGORY,
+            new_category_name: '1日目'
+          )
+        }
+      end
+
+      it '立替払いもカテゴリも作成しない' do
+        expect { subject }.not_to change(PaymentCategory, :count)
+        expect(Payment.count).to eq(0)
       end
     end
   end
@@ -237,6 +312,45 @@ RSpec.describe PaymentsController, type: :request do
       it '立替払いを更新する' do
         subject
         expect(payment.reload.personal_amount).to eq(1000)
+      end
+    end
+
+    context 'カテゴリを付け替える場合' do
+      let(:valid_attributes) do
+        { payer_member_id: member.id, description: 'ランチ代', amount: 3600, member_ids: [ member.id ] }
+      end
+      let!(:day1) { create(:payment_category, group: group) }
+      let!(:day2) { create(:payment_category, group: group) }
+
+      before { payment.update!(category: day1) }
+
+      context '別の既存カテゴリを選んだ場合' do
+        let(:params) { { payment: valid_attributes.merge(payment_category_id: day2.id) } }
+
+        it 'カテゴリを差し替える' do
+          subject
+          expect(payment.reload.category).to eq(day2)
+        end
+      end
+
+      context '未分類を選んだ場合' do
+        let(:params) { { payment: valid_attributes.merge(payment_category_id: '') } }
+
+        it 'カテゴリを外す' do
+          subject
+          expect(payment.reload.category).to be_nil
+        end
+      end
+
+      context '新しいカテゴリ名を入力した場合' do
+        let(:params) do
+          { payment: valid_attributes.merge(payment_category_id: PaymentsController::NEW_CATEGORY, new_category_name: '3日目') }
+        end
+
+        it 'カテゴリを作成して紐づける' do
+          expect { subject }.to change(PaymentCategory, :count).by(1)
+          expect(payment.reload.category.name).to eq('3日目')
+        end
       end
     end
   end

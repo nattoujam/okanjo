@@ -1,4 +1,6 @@
 class PaymentsController < ApplicationController
+  NEW_CATEGORY = "__new__".freeze
+
   before_action :set_group
   before_action :set_payment, only: [ :edit, :update, :destroy ]
 
@@ -9,6 +11,7 @@ class PaymentsController < ApplicationController
 
   def create
     @payment = @group.payments.build(payment_params)
+    @payment.category = resolve_category
 
     if @payment.save
       redirect_to group_show_path(@group.token)
@@ -36,7 +39,7 @@ class PaymentsController < ApplicationController
     end
 
     ActiveRecord::Base.transaction do
-      @payment.update!(payment_base_params)
+      @payment.update!(payment_base_params.merge(category: resolve_category))
       @payment.payment_participants.destroy_all
       member_ids.each { |id| @payment.payment_participants.create!(member_id: id) }
     end
@@ -48,11 +51,23 @@ class PaymentsController < ApplicationController
   private
 
   def set_group
-    @group = Group.includes(:members).find_by!(token: params[:token])
+    @group = Group.includes(:members, :payment_categories).find_by!(token: params[:token])
   end
 
   def set_payment
     @payment = @group.payments.find(params[:id])
+  end
+
+  # 新規ビルドしたカテゴリは belongs_to の autosave に任せる。
+  # 立替払いがバリデーションで落ちたときにカテゴリだけが残るのを防ぐため。
+  def resolve_category
+    selected = params.dig(:payment, :payment_category_id).to_s
+    return @group.payment_categories.find_by(id: selected) unless selected == NEW_CATEGORY
+
+    name = params.dig(:payment, :new_category_name).to_s.strip
+    return nil if name.blank?
+
+    @group.payment_categories.find_or_initialize_by(name: name)
   end
 
   def payment_base_params

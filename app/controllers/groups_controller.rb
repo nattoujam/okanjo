@@ -16,11 +16,20 @@ class GroupsController < ApplicationController
   end
 
   def show
-    @group = Group.includes(:members, payments: [ :payer, :payment_participants ]).find_by!(token: params[:token])
+    @group = Group.includes(:members, :payment_categories, payments: [ :payer, :payment_participants ]).find_by!(token: params[:token])
+    @grouped_payments = group_payments_by_category(@group)
     render :show
   end
 
   private
+
+  # preload 済みの association で完結させて追加クエリを出さないため、立替払いの新しい順は Ruby 側で並べ替えている
+  def group_payments_by_category(group)
+    buckets = group.payments.sort_by(&:created_at).reverse.group_by(&:payment_category_id)
+    grouped = group.payment_categories.filter_map { |category| [ category, buckets[category.id] ] if buckets[category.id].present? }
+    grouped << [ nil, buckets[nil] ] if buckets[nil].present?
+    grouped
+  end
 
   def group_params
     params.require(:group).permit(:name, :memo, members_attributes: [ :name ])
