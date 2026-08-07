@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_11_161538) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_07_161814) do
   create_table "groups", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "memo"
@@ -28,6 +28,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_11_161538) do
     t.index ["group_id"], name: "index_members_on_group_id"
   end
 
+  create_table "payment_categories", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "group_id", null: false
+    t.string "name", null: false
+    t.integer "sequence", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["group_id", "name"], name: "index_payment_categories_on_group_id_and_name", unique: true
+    t.index ["group_id", "sequence"], name: "index_payment_categories_on_group_id_and_sequence", unique: true
+    t.index ["group_id"], name: "index_payment_categories_on_group_id"
+  end
+
   create_table "payment_participants", force: :cascade do |t|
     t.integer "member_id", null: false
     t.integer "payment_id", null: false
@@ -42,14 +53,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_11_161538) do
     t.string "description", null: false
     t.integer "group_id", null: false
     t.bigint "payer_member_id", null: false
+    t.integer "payment_category_id"
     t.integer "personal_amount", default: 0, null: false
     t.datetime "updated_at", null: false
     t.index ["group_id"], name: "index_payments_on_group_id"
+    t.index ["payment_category_id"], name: "index_payments_on_payment_category_id"
   end
 
   add_foreign_key "members", "groups"
+  add_foreign_key "payment_categories", "groups"
   add_foreign_key "payment_participants", "members"
   add_foreign_key "payment_participants", "payments"
   add_foreign_key "payments", "groups"
   add_foreign_key "payments", "members", column: "payer_member_id"
+  add_foreign_key "payments", "payment_categories"
 end

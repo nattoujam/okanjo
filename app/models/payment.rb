@@ -1,6 +1,7 @@
 class Payment < ApplicationRecord
   belongs_to :group
   belongs_to :payer, class_name: "Member", foreign_key: :payer_member_id
+  belongs_to :category, class_name: "PaymentCategory", foreign_key: :payment_category_id, optional: true
   has_many :payment_participants, dependent: :destroy
   has_many :participants, through: :payment_participants, source: :member
 
