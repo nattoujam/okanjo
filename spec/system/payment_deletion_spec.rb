@@ -11,6 +11,7 @@ RSpec.describe '立替払いの削除', type: :system do
   it '確認ダイアログを承認すると削除される' do
     visit group_show_path(group.token)
     expect(page).to have_content('テスト支払い')
+    toggle_edit_mode
 
     accept_confirm '「テスト支払い」を削除しますか？' do
       click_button '削除'
@@ -21,6 +22,7 @@ RSpec.describe '立替払いの削除', type: :system do
 
   it '確認ダイアログを却下すると削除されない' do
     visit group_show_path(group.token)
+    toggle_edit_mode
 
     dismiss_confirm '「テスト支払い」を削除しますか？' do
       click_button '削除'

@@ -6,6 +6,10 @@
   }
 }
 
+/* 編集モードの状態は .edit-mode-scope 配下にある .edit-mode-switch のチェック状態だけで決まる。
+   JS は sessionStorage からの復元にしか関わらないので、表示の切り替えは JS の初期化を待たない */
+@custom-variant edit-mode (&:is(:where(.edit-mode-scope):has(.edit-mode-switch:checked) *));
+
 @layer components {
   .btn-primary {
     @apply py-2 px-4 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 text-sm cursor-pointer;

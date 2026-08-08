@@ -1,8 +1,23 @@
 <% content_for :title, "#{@group.name} | Okanjo" %>
 
-<div class="w-full max-w-md mx-auto">
+<div class="w-full max-w-md mx-auto edit-mode-scope"
+     data-controller="edit-mode"
+     data-edit-mode-storage-key-value="okanjo:edit-mode:<%= @group.token %>">
   <div class="mb-6">
-    <h1 class="text-2xl font-bold"><%= @group.name %></h1>
+    <div class="flex justify-between items-start gap-2">
+      <h1 class="text-2xl font-bold"><%= @group.name %></h1>
+      <label class="flex items-center gap-2 flex-shrink-0 mt-1 cursor-pointer">
+        <span class="text-sm text-gray-500">編集モード</span>
+        <input type="checkbox"
+               role="switch"
+               class="edit-mode-switch sr-only"
+               data-edit-mode-target="switch"
+               data-action="change->edit-mode#persist">
+        <span class="flex h-6 w-11 flex-shrink-0 items-center rounded-full border-2 border-transparent bg-gray-300 transition-colors edit-mode:bg-blue-600">
+          <span class="h-5 w-5 rounded-full bg-white shadow transition-transform edit-mode:translate-x-5"></span>
+        </span>
+      </label>
+    </div>
     <% if @group.memo.present? %>
       <p class="text-sm text-gray-500 mt-1"><%= @group.memo %></p>
     <% end %>
@@ -29,11 +44,15 @@
               group_member_path(@group.token, member),
               method: :delete,
               class: "text-gray-400 hover:text-red-500 ml-1",
-              form: { data: { turbo_confirm: "#{member.name}を削除しますか？" } } %>
+              form: {
+                class: "not-edit-mode:hidden",
+                data: { turbo_confirm: "#{member.name}を削除しますか？" }
+              } %>
         </li>
       <% end %>
     </ul>
-    <%= form_with url: group_members_path(@group.token), method: :post, class: "flex gap-2" do |f| %>
+    <%= form_with url: group_members_path(@group.token), method: :post,
+        class: "flex gap-2 not-edit-mode:hidden" do |f| %>
       <%= f.text_field :name,
           name: "member[name]",
           placeholder: "名前",

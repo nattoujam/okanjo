@@ -20,6 +20,7 @@ RSpec.describe '割り勘の一連の流れ', type: :system do
     expect(page).to have_content('メンバーB')
 
     # 作成後の画面からもメンバーを追加できる
+    toggle_edit_mode
     find("input[name='member[name]']").set('メンバーC')
     click_button '追加'
 
