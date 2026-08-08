@@ -74,6 +74,32 @@ RSpec.describe PaymentCategory, type: :model do
     end
   end
 
+  describe '#swap_sequence_with!' do
+    let(:group) { create(:group) }
+    let!(:day1) { create(:payment_category, group: group, name: '1日目') }
+    let!(:day2) { create(:payment_category, group: group, name: '2日目') }
+
+    it 'sequenceを入れ替える' do
+      day1.swap_sequence_with!(day2)
+
+      expect(day1.reload.sequence).to eq(2)
+      expect(day2.reload.sequence).to eq(1)
+    end
+
+    it '並び順が入れ替わる' do
+      expect { day1.swap_sequence_with!(day2) }
+        .to change { group.payment_categories.reload.to_a }.from([ day1, day2 ]).to([ day2, day1 ])
+    end
+
+    it '隣り合わないカテゴリ同士でも入れ替えられる' do
+      day3 = create(:payment_category, group: group, name: '3日目')
+
+      day1.swap_sequence_with!(day3)
+
+      expect(group.payment_categories.reload.to_a).to eq([ day3, day2, day1 ])
+    end
+  end
+
   describe '#destroy' do
     let(:group) { create(:group) }
     let(:member) { create(:member, group: group) }

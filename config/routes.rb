@@ -18,5 +18,11 @@ Rails.application.routes.draw do
     get "/settlements", to: "settlements#show", as: :group_settlements
     resources :payments, only: [ :new, :create, :edit, :update, :destroy ], as: :group_payments
     resources :members, only: [ :create, :destroy ], as: :group_members
+    resources :payment_categories, only: [], as: :group_payment_categories do
+      member do
+        patch :move_up
+        patch :move_down
+      end
+    end
   end
 end

@@ -112,6 +112,84 @@ RSpec.describe '立替払いのカテゴリ分類', type: :system do
     expect(page).not_to have_css('h3')
   end
 
+  describe 'カテゴリの並び替え' do
+    let!(:day1) { create(:payment_category, group: group, name: '1日目') }
+    let!(:day2) { create(:payment_category, group: group, name: '2日目') }
+
+    before do
+      create(:payment, group: group, payer: member, category: day1, description: 'ランチ代', participants: [ member ])
+      create(:payment, group: group, payer: member, category: day2, description: '夕食代', participants: [ member ])
+      create(:payment, group: group, payer: member, description: '雑費', participants: [ member ])
+    end
+
+    # 並び替えは Turbo の再描画を待つ必要があるので、待機する matcher で1件ずつ位置を確かめる
+    def expect_category_order(*names)
+      names.each_with_index do |name, index|
+        expect(page).to have_xpath("(//h3)[#{index + 1}]", text: name)
+      end
+    end
+
+    it '通常モードでは並び替えの矢印を出さない' do
+      visit group_show_path(group.token)
+
+      expect(page).not_to have_button('↑', disabled: :all)
+      expect(page).not_to have_button('↓', disabled: :all)
+    end
+
+    it '編集モードで矢印を押した方向に1つ入れ替える' do
+      visit group_show_path(group.token)
+      toggle_edit_mode
+
+      within_category_heading('2日目') { click_button '↑' }
+      expect_category_order('2日目', '1日目', '未分類')
+
+      within_category_heading('2日目') { click_button '↓' }
+      expect_category_order('1日目', '2日目', '未分類')
+    end
+
+    it '立替払いが1件もないカテゴリも並び替えられる' do
+      create(:payment_category, group: group, name: '3日目')
+
+      visit group_show_path(group.token)
+      toggle_edit_mode
+
+      within_category_heading('3日目') { click_button '↑' }
+      expect_category_order('1日目', '3日目', '2日目', '未分類')
+    end
+
+    it '端のカテゴリでは行き先のない矢印を押せなくする' do
+      visit group_show_path(group.token)
+      toggle_edit_mode
+
+      within_category_heading('1日目') { expect(find_button('↑', disabled: true)).to be_present }
+      within_category_heading('2日目') { expect(find_button('↓', disabled: true)).to be_present }
+    end
+
+    it '未分類には矢印を出さない' do
+      visit group_show_path(group.token)
+      toggle_edit_mode
+
+      within_category_heading('未分類') do
+        expect(page).not_to have_button('↑')
+        expect(page).not_to have_button('↓')
+      end
+    end
+
+    it '並び替えた後も編集モードを維持する' do
+      visit group_show_path(group.token)
+      toggle_edit_mode
+
+      within_category_heading('2日目') { click_button '↑' }
+
+      expect(page).to have_checked_field('編集モード', visible: :all)
+      expect(page).to have_button('↓')
+    end
+  end
+
+  def within_category_heading(name, &block)
+    within(find('h3', text: name).find(:xpath, '..'), &block)
+  end
+
   def within_category(name, &block)
     within(find('h3', text: name).find(:xpath, '../..'), &block)
   end

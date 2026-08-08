@@ -78,12 +78,30 @@
     <% else %>
       <%# カテゴリが1件も無いうちは「未分類」だけの見出しになるので出さない %>
       <% show_headings = @group.payment_categories.any? %>
-      <% @grouped_payments.each do |category, payments| %>
+      <%# 未分類は常に最後なので、カテゴリの並びは先頭から数えた位置がそのまま添字になる %>
+      <% category_count = @grouped_payments.count { |category, _| category } %>
+      <% @grouped_payments.each_with_index do |(category, payments), index| %>
         <div class="mb-5">
           <% if show_headings %>
-            <div class="flex justify-between items-baseline mb-2">
+            <div class="flex items-baseline gap-1 mb-2">
               <h3 class="text-sm font-semibold"><%= category&.name || "未分類" %></h3>
-              <span class="text-xs text-gray-500"><%= number_with_delimiter(payments.sum(&:split_amount)) %>円</span>
+              <% if category %>
+                <%= button_to "↑",
+                    move_up_group_payment_category_path(@group.token, category),
+                    method: :patch,
+                    disabled: index.zero?,
+                    class: "text-xs px-1 text-gray-400 hover:text-gray-700 cursor-pointer disabled:text-gray-200 disabled:cursor-default",
+                    aria: { label: "#{category.name}を上へ移動" },
+                    form: { class: "not-edit-mode:hidden" } %>
+                <%= button_to "↓",
+                    move_down_group_payment_category_path(@group.token, category),
+                    method: :patch,
+                    disabled: index == category_count - 1,
+                    class: "text-xs px-1 text-gray-400 hover:text-gray-700 cursor-pointer disabled:text-gray-200 disabled:cursor-default",
+                    aria: { label: "#{category.name}を下へ移動" },
+                    form: { class: "not-edit-mode:hidden" } %>
+              <% end %>
+              <span class="text-xs text-gray-500 ml-auto"><%= number_with_delimiter(payments.sum(&:split_amount)) %>円</span>
             </div>
           <% end %>
           <% if payments.empty? %>

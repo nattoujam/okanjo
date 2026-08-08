@@ -7,6 +7,18 @@ class PaymentCategory < ApplicationRecord
 
   validates :name, presence: true, uniqueness: { scope: :group_id }
 
+  # SQLite の UNIQUE 制約は行ごとに検査されて遅延できないため、
+  # [group_id, sequence] の重複を避けるには一度どちらかを未使用の負値へ退避するしかない
+  def swap_sequence_with!(other)
+    own_sequence, other_sequence = sequence, other.sequence
+
+    self.class.transaction do
+      update!(sequence: -own_sequence)
+      other.update!(sequence: own_sequence)
+      update!(sequence: other_sequence)
+    end
+  end
+
   private
 
   # MAX+1 のレースは Rails が SQLite を BEGIN IMMEDIATE で開く（save 開始時に書き込みロックを取る）ことで防げている
