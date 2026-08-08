@@ -1,13 +1,13 @@
-<li class="bg-white border rounded-lg px-4 py-3">
+<li class="bg-surface border rounded-lg px-4 py-3">
   <div class="flex justify-between items-start">
     <div>
-      <span class="text-xs text-gray-500"><%= payment.payer.name %></span>
+      <span class="text-xs text-content-3"><%= payment.payer.name %></span>
       <p class="font-medium"><%= payment.description %></p>
-      <p class="text-xs text-gray-400 mt-1">
+      <p class="text-xs text-content-4 mt-1">
         対象: <%= payment.payment_participants.map { |pp| pp.member.name }.join(", ") %>
       </p>
       <% if payment.personal_amount.positive? %>
-        <p class="text-xs text-gray-400 mt-1">
+        <p class="text-xs text-content-4 mt-1">
           うち<%= number_with_delimiter(payment.personal_amount) %>円は自分用（精算対象外）
         </p>
       <% end %>
@@ -15,11 +15,11 @@
     <div class="text-right">
       <p class="font-bold"><%= number_with_delimiter(payment.amount) %>円</p>
       <div class="not-edit-mode:hidden">
-        <a href="<%= edit_group_payment_path(group.token, payment) %>" class="text-xs text-blue-500 hover:underline mt-1 inline-block">編集</a>
+        <a href="<%= edit_group_payment_path(group.token, payment) %>" class="text-xs text-brand hover:underline mt-1 inline-block">編集</a>
         <%= button_to "削除",
             group_payment_path(group.token, payment),
             method: :delete,
-            class: "text-xs text-red-400 hover:text-red-600 mt-1",
+            class: "text-xs text-danger-soft hover:text-danger-strong mt-1",
             form: { data: { turbo_confirm: "「#{payment.description}」を削除しますか？" } } %>
       </div>
     </div>

@@ -2,41 +2,41 @@
 
 <div class="w-full max-w-md mx-auto">
   <div class="mb-6">
-    <a href="<%= group_show_path(@group.token) %>" class="text-sm text-gray-500 hover:text-gray-700">← <%= @group.name %></a>
+    <a href="<%= group_show_path(@group.token) %>" class="text-sm text-content-3 hover:text-content-1">← <%= @group.name %></a>
     <h1 class="text-2xl font-bold mt-2">精算結果</h1>
   </div>
 
   <div class="mb-5">
-    <p class="text-xs text-gray-500 mb-2">精算アルゴリズム</p>
-    <div class="flex text-sm rounded-lg border border-gray-300 overflow-hidden w-fit">
+    <p class="text-xs text-content-3 mb-2">精算アルゴリズム</p>
+    <div class="flex text-sm rounded-lg border border-line overflow-hidden w-fit">
       <%= link_to "支払い回数を最小化",
             group_settlements_path(@group.token, algo: "optimal"),
-            class: "px-4 py-1.5 #{@algo == 'optimal' ? 'bg-gray-800 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}",
+            class: "px-4 py-1.5 #{@algo == 'optimal' ? 'bg-surface-inverse text-on-inverse' : 'bg-surface text-content-2 hover:bg-surface-sunken'}",
             data: { turbo_prefetch: false } %>
-      <div class="w-px bg-gray-300"></div>
+      <div class="w-px bg-line"></div>
       <%= link_to "シンプルに計算",
             group_settlements_path(@group.token, algo: "greedy"),
-            class: "px-4 py-1.5 #{@algo == 'greedy' ? 'bg-gray-800 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}",
+            class: "px-4 py-1.5 #{@algo == 'greedy' ? 'bg-surface-inverse text-on-inverse' : 'bg-surface text-content-2 hover:bg-surface-sunken'}",
             data: { turbo_prefetch: false } %>
     </div>
   </div>
 
   <% if @repayments.empty? %>
-    <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-6 text-center mb-6">
-      <p class="text-green-700 font-medium">精算の必要はありません！</p>
-      <p class="text-sm text-green-600 mt-1">全員の収支がつり合っています</p>
+    <div class="bg-success-surface border border-success-line rounded-lg px-4 py-6 text-center mb-6">
+      <p class="text-success-strong font-medium">精算の必要はありません！</p>
+      <p class="text-sm text-success mt-1">全員の収支がつり合っています</p>
     </div>
   <% else %>
-    <div class="mb-2 text-sm text-gray-500">
-      <span class="font-bold text-gray-800"><%= @repayments.size %></span> 回の支払いで精算できます
+    <div class="mb-2 text-sm text-content-3">
+      <span class="font-bold text-content-1"><%= @repayments.size %></span> 回の支払いで精算できます
     </div>
 
     <ul class="space-y-3 mb-6">
       <% @repayments.each do |r| %>
-        <li class="bg-white border rounded-lg px-4 py-3 flex justify-between items-center">
+        <li class="bg-surface border rounded-lg px-4 py-3 flex justify-between items-center">
           <div class="flex items-center gap-2">
             <span class="font-medium"><%= r[:from].name %></span>
-            <span class="text-gray-400">→</span>
+            <span class="text-content-4">→</span>
             <span class="font-medium"><%= r[:to].name %></span>
           </div>
           <span class="font-bold"><%= number_with_delimiter(r[:amount]) %>円</span>
@@ -46,12 +46,12 @@
   <% end %>
 
   <section class="mb-8">
-    <h2 class="text-sm font-semibold text-gray-500 mb-3">各自の収支</h2>
+    <h2 class="text-sm font-semibold text-content-3 mb-3">各自の収支</h2>
     <ul class="space-y-2">
       <% @balances.each do |b| %>
         <li class="flex justify-between items-center text-sm py-1 border-b last:border-b-0">
           <span><%= b[:member].name %></span>
-          <span class="font-medium <%= b[:balance] >= 0 ? 'text-blue-600' : 'text-red-500' %>">
+          <span class="font-medium <%= b[:balance] >= 0 ? 'text-positive' : 'text-negative' %>">
             <%= b[:balance] >= 0 ? '+' : '' %><%= number_with_delimiter(b[:balance]) %>円
           </span>
         </li>

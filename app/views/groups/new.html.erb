@@ -5,7 +5,7 @@
 
   <%= form_with model: @group, data: { controller: "member-form" } do |f| %>
     <% if @group.errors.any? %>
-      <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+      <div class="mb-4 p-3 bg-danger-surface border border-danger-line rounded text-danger-strong text-sm">
         <% @group.errors.full_messages.each do |msg| %>
           <p><%= msg %></p>
         <% end %>
@@ -14,12 +14,12 @@
 
     <div class="mb-4">
       <%= f.label :name, "グループ名", class: "block text-sm font-medium mb-1" %>
-      <%= f.text_field :name, class: "w-full border rounded px-3 py-2 text-sm", placeholder: "例: GW京都旅行" %>
+      <%= f.text_field :name, class: "field w-full", placeholder: "例: GW京都旅行" %>
     </div>
 
     <div class="mb-6">
       <%= f.label :memo, "メモ（任意）", class: "block text-sm font-medium mb-1" %>
-      <%= f.text_area :memo, rows: 2, class: "w-full border rounded px-3 py-2 text-sm", placeholder: "備考など" %>
+      <%= f.text_area :memo, rows: 2, class: "field w-full", placeholder: "備考など" %>
     </div>
 
     <div class="mb-6">
@@ -28,7 +28,7 @@
       <div class="flex gap-2 mb-3">
         <input type="text"
                placeholder="名前"
-               class="flex-1 border rounded px-3 py-2 text-sm"
+               class="field flex-1"
                data-member-form-target="nameInput" />
         <button type="button"
                 class="btn-secondary"
@@ -45,15 +45,15 @@
   <% end %>
 
   <% if Rails.env.development? && @groups.present? %>
-    <div class="mt-10 pt-6 border-t border-dashed border-gray-300">
-      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">開発用サンプル（全<%= @groups.size %>件）</p>
+    <div class="mt-10 pt-6 border-t border-dashed border-line">
+      <p class="text-xs font-semibold text-content-4 uppercase tracking-wide mb-3">開発用サンプル（全<%= @groups.size %>件）</p>
       <ul class="space-y-2">
         <% @groups.each do |group| %>
-          <li class="flex items-center justify-between text-sm bg-gray-50 rounded px-3 py-2">
-            <span><%= group.name %> <span class="text-gray-400 text-xs">— <%= group.memo %></span></span>
+          <li class="flex items-center justify-between text-sm bg-surface rounded px-3 py-2">
+            <span><%= group.name %> <span class="text-content-4 text-xs">— <%= group.memo %></span></span>
             <div class="flex gap-3">
-              <a href="<%= group_show_path(group.token) %>" class="text-blue-500 hover:underline">詳細</a>
-              <a href="<%= group_settlements_path(group.token) %>" class="text-blue-500 hover:underline">精算</a>
+              <a href="<%= group_show_path(group.token) %>" class="text-brand hover:underline">詳細</a>
+              <a href="<%= group_settlements_path(group.token) %>" class="text-brand hover:underline">精算</a>
             </div>
           </li>
         <% end %>

@@ -7,22 +7,22 @@
     <div class="flex justify-between items-start gap-2">
       <h1 class="text-2xl font-bold"><%= @group.name %></h1>
       <label class="flex items-center gap-2 flex-shrink-0 mt-1 cursor-pointer">
-        <span class="text-sm text-gray-500">編集モード</span>
+        <span class="text-sm text-content-3">編集モード</span>
         <input type="checkbox"
                role="switch"
                class="edit-mode-switch sr-only"
                data-edit-mode-target="switch"
                data-action="change->edit-mode#persist">
-        <span class="flex h-6 w-11 flex-shrink-0 items-center rounded-full border-2 border-transparent bg-gray-300 transition-colors edit-mode:bg-blue-600">
-          <span class="h-5 w-5 rounded-full bg-white shadow transition-transform edit-mode:translate-x-5"></span>
+        <span class="flex h-6 w-11 flex-shrink-0 items-center rounded-full border-2 border-transparent bg-control transition-colors edit-mode:bg-brand">
+          <span class="h-5 w-5 rounded-full bg-surface shadow transition-transform edit-mode:translate-x-5"></span>
         </span>
       </label>
     </div>
     <% if @group.memo.present? %>
-      <p class="text-sm text-gray-500 mt-1"><%= @group.memo %></p>
+      <p class="text-sm text-content-3 mt-1"><%= @group.memo %></p>
     <% end %>
     <% if flash[:alert] %>
-      <p class="text-sm text-red-600 mt-2"><%= flash[:alert] %></p>
+      <p class="text-sm text-danger-strong mt-2"><%= flash[:alert] %></p>
     <% end %>
   </div>
 
@@ -38,12 +38,12 @@
     <p class="text-sm font-medium mb-2">メンバー</p>
     <ul class="flex flex-wrap gap-2 mb-3">
       <% @group.members.each do |member| %>
-        <li class="flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1 text-sm">
+        <li class="flex items-center gap-1 bg-surface-sunken rounded-full px-3 py-1 text-sm">
           <%= member.name %>
           <%= button_to "&times;".html_safe,
               group_member_path(@group.token, member),
               method: :delete,
-              class: "text-gray-400 hover:text-red-500 ml-1",
+              class: "text-content-4 hover:text-danger ml-1",
               form: {
                 class: "not-edit-mode:hidden",
                 data: { turbo_confirm: "#{member.name}を削除しますか？" }
@@ -56,7 +56,7 @@
       <%= f.text_field :name,
           name: "member[name]",
           placeholder: "名前",
-          class: "flex-1 border rounded px-3 py-2 text-sm" %>
+          class: "field flex-1" %>
       <%= f.submit "追加", class: "btn-secondary" %>
     <% end %>
   </div>
@@ -71,10 +71,10 @@
   </div>
 
   <section>
-    <h2 class="text-sm font-semibold text-gray-500 mb-3">立替払い一覧</h2>
+    <h2 class="text-sm font-semibold text-content-3 mb-3">立替払い一覧</h2>
 
     <% if @group.payments.empty? %>
-      <p class="text-center text-gray-400 text-sm py-10">まだ立替払いがありません</p>
+      <p class="text-center text-content-4 text-sm py-10">まだ立替払いがありません</p>
     <% else %>
       <%# カテゴリが1件も無いうちは「未分類」だけの見出しになるので出さない %>
       <% show_headings = @group.payment_categories.any? %>
@@ -90,22 +90,22 @@
                     move_up_group_payment_category_path(@group.token, category),
                     method: :patch,
                     disabled: index.zero?,
-                    class: "text-xs px-1 text-gray-400 hover:text-gray-700 cursor-pointer disabled:text-gray-200 disabled:cursor-default",
+                    class: "text-xs px-1 text-content-4 hover:text-content-1 cursor-pointer disabled:text-content-disabled disabled:cursor-default",
                     aria: { label: "#{category.name}を上へ移動" },
                     form: { class: "not-edit-mode:hidden" } %>
                 <%= button_to "↓",
                     move_down_group_payment_category_path(@group.token, category),
                     method: :patch,
                     disabled: index == category_count - 1,
-                    class: "text-xs px-1 text-gray-400 hover:text-gray-700 cursor-pointer disabled:text-gray-200 disabled:cursor-default",
+                    class: "text-xs px-1 text-content-4 hover:text-content-1 cursor-pointer disabled:text-content-disabled disabled:cursor-default",
                     aria: { label: "#{category.name}を下へ移動" },
                     form: { class: "not-edit-mode:hidden" } %>
               <% end %>
-              <span class="text-xs text-gray-500 ml-auto"><%= number_with_delimiter(payments.sum(&:split_amount)) %>円</span>
+              <span class="text-xs text-content-3 ml-auto"><%= number_with_delimiter(payments.sum(&:split_amount)) %>円</span>
             </div>
           <% end %>
           <% if payments.empty? %>
-            <p class="text-xs text-gray-400">立替払いがありません</p>
+            <p class="text-xs text-content-4">立替払いがありません</p>
           <% else %>
             <ul class="space-y-3">
               <%= render partial: "payments/payment", collection: payments, locals: { group: @group } %>
@@ -115,7 +115,7 @@
       <% end %>
 
       <% split_total = @group.payments.sum(&:split_amount) %>
-      <div class="mt-4 pt-4 border-t text-sm text-gray-600">
+      <div class="mt-4 pt-4 border-t text-sm text-content-2">
         <div class="flex justify-between">
           <span>合計（精算対象額）</span>
           <span class="font-bold"><%= number_with_delimiter(split_total) %>円</span>

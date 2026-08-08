@@ -1,8 +1,86 @@
 @import "tailwindcss";
 
+/* ユーティリティを生やさないため --color-* 名前空間の外に置く。
+   参照されるだけの変数はツリーシェイクで消えるので static で常時出力する */
+@theme static {
+  --palette-parchment-50: #fbf6ec;
+  --palette-parchment-100: #f4ece0;
+  --palette-parchment-200: #ebdfcb;
+  --palette-parchment-300: #ddd0bb;
+  --palette-parchment-400: #c4b39a;
+
+  --palette-ink-500: #9a8b77;
+  --palette-ink-600: #7d7060;
+  --palette-ink-700: #574a3c;
+  --palette-ink-900: #3a3129;
+
+  --palette-indigo-600: #3f5f7f;
+  --palette-indigo-700: #33506d;
+
+  --palette-clay-100: #f7e5de;
+  --palette-clay-200: #e6c5ba;
+  --palette-clay-400: #c2705f;
+  --palette-clay-600: #a8503f;
+  --palette-clay-700: #8d3f30;
+
+  --palette-moss-100: #ebf1e0;
+  --palette-moss-200: #cedcba;
+  --palette-moss-600: #5c7a4a;
+  --palette-moss-700: #47603a;
+}
+
+/* inline を付けるとユーティリティに値が展開されて var(--color-*) 参照が消える。
+   この層を実行時の差し替え点として残すため付けない */
+@theme static {
+  --color-canvas: var(--palette-parchment-100);
+  --color-surface: var(--palette-parchment-50);
+  --color-surface-sunken: var(--palette-parchment-200);
+  --color-surface-inverse: var(--palette-ink-900);
+
+  /* 1 が最も強く、数字が大きいほど弱い */
+  --color-content-1: var(--palette-ink-900);
+  --color-content-2: var(--palette-ink-700);
+  --color-content-3: var(--palette-ink-600);
+  --color-content-4: var(--palette-ink-500);
+  --color-content-disabled: var(--palette-parchment-300);
+  --color-on-brand: var(--palette-parchment-100);
+  --color-on-inverse: var(--palette-parchment-100);
+
+  --color-line: var(--palette-parchment-300);
+  --color-control: var(--palette-parchment-400);
+
+  --color-brand: var(--palette-indigo-600);
+  --color-brand-strong: var(--palette-indigo-700);
+
+  /* brand と同値だが、ブランド色を変えても収支の色に波及しないよう分ける */
+  --color-positive: var(--palette-indigo-600);
+  --color-negative: var(--palette-clay-600);
+
+  --color-danger: var(--palette-clay-600);
+  --color-danger-strong: var(--palette-clay-700);
+  --color-danger-soft: var(--palette-clay-400);
+  --color-danger-surface: var(--palette-clay-100);
+  --color-danger-line: var(--palette-clay-200);
+
+  --color-success: var(--palette-moss-600);
+  --color-success-strong: var(--palette-moss-700);
+  --color-success-surface: var(--palette-moss-100);
+  --color-success-line: var(--palette-moss-200);
+}
+
 @layer base {
   body {
     font-family: "Noto Sans JP", sans-serif;
+    background-color: var(--color-canvas);
+    color: var(--color-content-1);
+  }
+
+  /* Tailwind v4 の border-color 既定値は currentColor なので、色指定のない border は
+     本文色そのままの濃い線になってしまう */
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-line);
   }
 }
 
@@ -12,9 +90,12 @@
 
 @layer components {
   .btn-primary {
-    @apply py-2 px-4 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 text-sm cursor-pointer;
+    @apply py-2 px-4 bg-brand text-on-brand rounded font-medium hover:bg-brand-strong text-sm cursor-pointer;
   }
   .btn-secondary {
-    @apply py-2 px-4 border border-gray-300 rounded font-medium hover:bg-gray-50 text-sm cursor-pointer;
+    @apply py-2 px-4 bg-surface border border-line rounded font-medium hover:bg-surface-sunken text-sm cursor-pointer;
+  }
+  .field {
+    @apply bg-surface border border-line rounded px-3 py-2 text-sm;
   }
 }

@@ -1,6 +1,6 @@
 <%= form_with model: @payment, url: form_url do |f| %>
   <% if @payment.errors.any? %>
-    <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+    <div class="mb-4 p-3 bg-danger-surface border border-danger-line rounded text-danger-strong text-sm">
       <% @payment.errors.full_messages.each do |msg| %>
         <p><%= msg %></p>
       <% end %>
@@ -14,7 +14,7 @@
         <label class="flex items-center gap-1 cursor-pointer">
           <%= radio_button_tag "payment[payer_member_id]", member.id,
               @payment.payer_member_id == member.id,
-              class: "accent-blue-600" %>
+              class: "accent-brand" %>
           <span class="text-sm"><%= member.name %></span>
         </label>
       <% end %>
@@ -27,35 +27,35 @@
         @group.payment_categories.map { |category| [ category.name, category.id ] } +
           [ [ "+ 新しいカテゴリ", PaymentsController::NEW_CATEGORY ] ],
         { include_blank: "未分類", selected: selected_category_value(@payment) },
-        class: "w-full border rounded px-3 py-2 text-sm",
+        class: "field w-full",
         data: { category_select_target: "select", action: "change->category-select#toggle" } %>
     <%= text_field_tag "payment[new_category_name]", new_category_name(@payment),
         placeholder: "例: 1日目",
-        class: "w-full border rounded px-3 py-2 text-sm mt-2",
+        class: "field w-full mt-2",
         data: { category_select_target: "newName" } %>
-    <p class="text-xs text-gray-400 mt-1">旅行の「1日目」やイベントの「食料費」など、立替払いをまとめる単位です</p>
+    <p class="text-xs text-content-4 mt-1">旅行の「1日目」やイベントの「食料費」など、立替払いをまとめる単位です</p>
   </div>
 
   <div class="mb-4">
     <%= f.label :description, "内容", class: "block text-sm font-medium mb-1" %>
-    <%= f.text_field :description, class: "w-full border rounded px-3 py-2 text-sm", placeholder: "例: ランチ代" %>
+    <%= f.text_field :description, class: "field w-full", placeholder: "例: ランチ代" %>
   </div>
 
   <div class="mb-6">
     <%= f.label :amount, "金額", class: "block text-sm font-medium mb-1" %>
     <div class="flex items-center gap-2">
-      <%= f.number_field :amount, min: 1, class: "w-full border rounded px-3 py-2 text-sm", placeholder: "3000" %>
-      <span class="text-sm text-gray-500">円</span>
+      <%= f.number_field :amount, min: 1, class: "field w-full", placeholder: "3000" %>
+      <span class="text-sm text-content-3">円</span>
     </div>
   </div>
 
   <div class="mb-6">
     <%= f.label :personal_amount, "自分用の金額（精算対象外・任意）", class: "block text-sm font-medium mb-1" %>
     <div class="flex items-center gap-2">
-      <%= f.number_field :personal_amount, min: 0, value: @payment.personal_amount || 0, class: "w-full border rounded px-3 py-2 text-sm", placeholder: "0" %>
-      <span class="text-sm text-gray-500">円</span>
+      <%= f.number_field :personal_amount, min: 0, value: @payment.personal_amount || 0, class: "field w-full", placeholder: "0" %>
+      <span class="text-sm text-content-3">円</span>
     </div>
-    <p class="text-xs text-gray-400 mt-1">ついでに自分用のものを買った場合など、割り勘から除きたい金額を入力してください</p>
+    <p class="text-xs text-content-4 mt-1">ついでに自分用のものを買った場合など、割り勘から除きたい金額を入力してください</p>
   </div>
 
   <div class="mb-6">
@@ -64,7 +64,7 @@
       <% @group.members.each do |member| %>
         <% checked = @payment.new_record? ? true : @payment.participant_ids.include?(member.id) %>
         <label class="flex items-center gap-1 cursor-pointer">
-          <%= check_box_tag "payment[member_ids][]", member.id, checked, class: "accent-blue-600" %>
+          <%= check_box_tag "payment[member_ids][]", member.id, checked, class: "accent-brand" %>
           <span class="text-sm"><%= member.name %></span>
         </label>
       <% end %>
