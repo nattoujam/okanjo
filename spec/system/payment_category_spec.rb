@@ -73,6 +73,45 @@ RSpec.describe '立替払いのカテゴリ分類', type: :system do
     expect(payment.reload.category.name).to eq('2日目')
   end
 
+  it '立替払いが1件もないカテゴリを小計0円のプレースホルダ付きで表示する' do
+    day1 = create(:payment_category, group: group, name: '1日目')
+    create(:payment_category, group: group, name: '2日目')
+    create(:payment, group: group, payer: member, category: day1, description: 'ランチ代', amount: 3600, participants: [ member ])
+
+    visit group_show_path(group.token)
+
+    expect(page.all('h3').map(&:text)).to eq([ '1日目', '2日目' ])
+    within_category('2日目') { expect(page).to have_content('立替払いがありません') }
+    expect(find('h3', text: '2日目').find(:xpath, '../span').text).to eq('0円')
+  end
+
+  it '最後の立替払いを削除してもカテゴリは残す' do
+    day1 = create(:payment_category, group: group, name: '1日目')
+    day2 = create(:payment_category, group: group, name: '2日目')
+    create(:payment, group: group, payer: member, category: day1, description: 'ランチ代', participants: [ member ])
+    create(:payment, group: group, payer: member, category: day2, description: '夕食代', participants: [ member ])
+
+    visit group_show_path(group.token)
+    toggle_edit_mode
+
+    accept_confirm '「ランチ代」を削除しますか？' do
+      within('li', text: 'ランチ代') { click_button '削除' }
+    end
+
+    expect(page).not_to have_content('ランチ代')
+    within_category('1日目') { expect(page).to have_content('立替払いがありません') }
+  end
+
+  # カテゴリだけが残った状態は「まだ立替払いがありません」に倒す（0円の見出しだけが並ぶのを避ける）
+  it '立替払いが1件もないグループではカテゴリの見出しを出さない' do
+    create(:payment_category, group: group, name: '1日目')
+
+    visit group_show_path(group.token)
+
+    expect(page).to have_content('まだ立替払いがありません')
+    expect(page).not_to have_css('h3')
+  end
+
   def within_category(name, &block)
     within(find('h3', text: name).find(:xpath, '../..'), &block)
   end

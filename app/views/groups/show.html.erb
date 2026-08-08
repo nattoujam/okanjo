@@ -86,9 +86,13 @@
               <span class="text-xs text-gray-500"><%= number_with_delimiter(payments.sum(&:split_amount)) %>円</span>
             </div>
           <% end %>
-          <ul class="space-y-3">
-            <%= render partial: "payments/payment", collection: payments, locals: { group: @group } %>
-          </ul>
+          <% if payments.empty? %>
+            <p class="text-xs text-gray-400">立替払いがありません</p>
+          <% else %>
+            <ul class="space-y-3">
+              <%= render partial: "payments/payment", collection: payments, locals: { group: @group } %>
+            </ul>
+          <% end %>
         </div>
       <% end %>
 

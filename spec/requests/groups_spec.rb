@@ -132,12 +132,12 @@ RSpec.describe GroupsController, type: :request do
 
       it 'カテゴリをsequence順に並べ、未分類を最後に表示する' do
         subject
-        expect(headings).to eq([ '1日目', '2日目', '未分類' ])
+        expect(headings).to eq([ '1日目', '2日目', '3日目', '未分類' ])
       end
 
-      it '立替払いが1件もないカテゴリの見出しを表示しない' do
+      it '立替払いが1件もないカテゴリも見出しを表示する' do
         subject
-        expect(headings).not_to include('3日目')
+        expect(headings).to include('3日目')
       end
 
       it 'カテゴリ内は作成日時の新しい順に表示する' do

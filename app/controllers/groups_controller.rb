@@ -26,7 +26,8 @@ class GroupsController < ApplicationController
   # preload 済みの association で完結させて追加クエリを出さないため、立替払いの新しい順は Ruby 側で並べ替えている
   def group_payments_by_category(group)
     buckets = group.payments.sort_by(&:created_at).reverse.group_by(&:payment_category_id)
-    grouped = group.payment_categories.filter_map { |category| [ category, buckets[category.id] ] if buckets[category.id].present? }
+    grouped = group.payment_categories.map { |category| [ category, buckets[category.id] || [] ] }
+    # 未分類は実体のあるカテゴリではないので、該当する立替払いが無ければ見出しごと出さない
     grouped << [ nil, buckets[nil] ] if buckets[nil].present?
     grouped
   end
