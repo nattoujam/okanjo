@@ -27,9 +27,13 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+  <% show_header = !current_page?(root_path) %>
+  <% main_spacing = content_for(:main_spacing) || (show_header ? "mt-16 mb-20" : "mt-28 mb-20") %>
+  <body class="min-h-screen flex flex-col">
+    <%= render "layouts/header" if show_header %>
+    <main class="container mx-auto <%= main_spacing %> px-5 flex flex-1">
       <%= yield %>
     </main>
+    <%= render "layouts/footer" %>
   </body>
 </html>
