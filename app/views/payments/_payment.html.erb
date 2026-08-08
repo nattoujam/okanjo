@@ -1,6 +1,6 @@
 <li class="bg-surface border rounded-lg px-4 py-3">
   <div class="flex justify-between items-start">
-    <div>
+    <div class="min-w-0">
       <span class="text-xs text-content-3"><%= payment.payer.name %></span>
       <p class="font-medium"><%= payment.description %></p>
       <p class="text-xs text-content-4 mt-1">
@@ -12,8 +12,8 @@
         </p>
       <% end %>
     </div>
-    <div class="text-right">
-      <p class="font-bold"><%= number_with_delimiter(payment.amount) %>円</p>
+    <div class="text-right shrink-0 ml-3">
+      <p class="font-bold whitespace-nowrap"><%= number_with_delimiter(payment.amount) %>円</p>
       <div class="not-edit-mode:hidden">
         <a href="<%= edit_group_payment_path(group.token, payment) %>" class="text-xs text-brand hover:underline mt-1 inline-block">編集</a>
         <%= button_to "削除",
