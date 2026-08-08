@@ -3,64 +3,11 @@ require 'rails_helper'
 RSpec.describe Payment, type: :model do
   describe 'validations' do
     it_behaves_like :required_string_column, :description, traits: [ :with_participant ]
+    it_behaves_like :integer_column, :amount, min: 1, traits: [ :with_participant ]
+    it_behaves_like :integer_column, :personal_amount, min: 0, allow_nil: true, traits: [ :with_participant ]
 
-    describe 'amount' do
-      subject { build(:payment, :with_participant, amount: amount) }
-
-      context 'バリデーション通過' do
-        let(:amount) { 1000 }
-
-        it { is_expected.to be_valid }
-      end
-
-      context 'amountがnilのとき' do
-        let(:amount) { nil }
-
-        it { is_expected.to be_invalid }
-      end
-
-      context 'amountが0のとき' do
-        let(:amount) { 0 }
-
-        it { is_expected.to be_invalid }
-      end
-
-      context 'amountが小数のとき' do
-        let(:amount) { 0.1 }
-
-        it { is_expected.to be_invalid }
-      end
-
-      context 'amountが負のとき' do
-        let(:amount) { -1 }
-
-        it { is_expected.to be_invalid }
-      end
-    end
-
-    describe 'personal_amount' do
+    describe '#personal_amount_must_be_less_than_amount' do
       subject { build(:payment, :with_participant, amount: 1000, personal_amount: personal_amount) }
-
-      context 'バリデーション通過' do
-        let(:personal_amount) { 300 }
-
-        it { is_expected.to be_valid }
-      end
-
-      context 'personal_amountがnilのとき' do
-        let(:personal_amount) { nil }
-
-        it '0として扱われる' do
-          subject.valid?
-          expect(subject.personal_amount).to eq(0)
-        end
-      end
-
-      context 'personal_amountが負のとき' do
-        let(:personal_amount) { -1 }
-
-        it { is_expected.to be_invalid }
-      end
 
       context 'personal_amountがamountと同額のとき' do
         let(:personal_amount) { 1000 }
@@ -90,6 +37,17 @@ RSpec.describe Payment, type: :model do
         subject { build(:payment, participants: [ create(:member) ]) }
 
         it { is_expected.to be_valid }
+      end
+    end
+  end
+
+  describe 'callbacks' do
+    describe 'personal_amountの既定値' do
+      subject { build(:payment, :with_participant, personal_amount: nil) }
+
+      it '0として扱われる' do
+        subject.valid?
+        expect(subject.personal_amount).to eq(0)
       end
     end
   end
