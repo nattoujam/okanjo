@@ -2,28 +2,12 @@ require 'rails_helper'
 
 RSpec.describe PaymentCategory, type: :model do
   describe 'validations' do
-    describe 'name' do
+    it_behaves_like :required_string_column, :name
+
+    describe 'nameの一意性' do
       let(:group) { create(:group) }
 
       subject { build(:payment_category, group: group, name: name) }
-
-      context 'バリデーション通過' do
-        let(:name) { '1日目' }
-
-        it { is_expected.to be_valid }
-      end
-
-      context 'nameがnilのとき' do
-        let(:name) { nil }
-
-        it { is_expected.to be_invalid }
-      end
-
-      context 'nameがemptyのとき' do
-        let(:name) { '' }
-
-        it { is_expected.to be_invalid }
-      end
 
       context '同じ割り勘グループ内でnameが重複したとき' do
         let(:name) { '1日目' }

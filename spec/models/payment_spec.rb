@@ -2,27 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Payment, type: :model do
   describe 'validations' do
-    describe 'description' do
-      subject { build(:payment, :with_participant, description: description) }
-
-      context 'バリデーション通過' do
-        let(:description) { 'ランチ代' }
-
-        it { is_expected.to be_valid }
-      end
-
-      context 'descriptionがnilのとき' do
-        let(:description) { nil }
-
-        it { is_expected.to be_invalid }
-      end
-
-      context 'descriptionがemptyのとき' do
-        let(:description) { '' }
-
-        it { is_expected.to be_invalid }
-      end
-    end
+    it_behaves_like :required_string_column, :description, traits: [ :with_participant ]
 
     describe 'amount' do
       subject { build(:payment, :with_participant, amount: amount) }
