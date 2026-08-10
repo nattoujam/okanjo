@@ -16,6 +16,8 @@ Rails.application.routes.draw do
   scope "/g/:token" do
     get "/", to: "groups#show", as: :group_show
     get "/settlements", to: "settlements#show", as: :group_settlements
+    get "/settlements/payments.csv", to: "settlements#payments_csv", as: :group_settlements_payments_csv
+    get "/settlements/results.csv",  to: "settlements#results_csv",  as: :group_settlements_results_csv
     resources :payments, only: [ :new, :create, :edit, :update, :destroy ], as: :group_payments
     resources :members, only: [ :create, :destroy ], as: :group_members
     resources :payment_categories, only: [], as: :group_payment_categories do

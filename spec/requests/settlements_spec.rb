@@ -57,4 +57,59 @@ RSpec.describe SettlementsController, type: :request do
       end
     end
   end
+
+  describe 'GET /g/:token/settlements/payments.csv' do
+    let(:group) { create(:group) }
+    let!(:tanaka) { create(:member, group: group, name: '田中') }
+    let!(:suzuki) { create(:member, group: group, name: '鈴木') }
+    let!(:category) { create(:payment_category, group: group, name: '食費') }
+
+    subject { get group_settlements_payments_csv_path(group.token) }
+
+    before do
+      create(:payment, group: group, payer: tanaka, category: category, description: 'ランチ代',
+                        amount: 3600, personal_amount: 600, participants: [ tanaka, suzuki ])
+    end
+
+    it '200を返しCSVとしてダウンロードされる' do
+      subject
+      expect(response).to have_http_status(:ok)
+      expect(response.media_type).to eq('text/csv')
+      expect(response.headers['Content-Disposition']).to include('attachment')
+    end
+
+    it '立替払いの内容をCSVに出力する' do
+      subject
+      expect(response.body).to include('ランチ代', '田中', '食費', '3600', '600', '3000')
+    end
+
+    it 'BOMを付与しない' do
+      subject
+      expect(response.body.b[0..2]).not_to eq("\xEF\xBB\xBF".b)
+    end
+  end
+
+  describe 'GET /g/:token/settlements/results.csv' do
+    let(:group) { create(:group) }
+    let!(:tanaka) { create(:member, group: group, name: '田中') }
+    let!(:suzuki) { create(:member, group: group, name: '鈴木') }
+
+    subject { get group_settlements_results_csv_path(group.token, algo: 'optimal') }
+
+    before do
+      create(:payment, group: group, payer: tanaka, description: 'ランチ代', amount: 2000,
+                        participants: [ tanaka, suzuki ])
+    end
+
+    it '200を返しCSVとしてダウンロードされる' do
+      subject
+      expect(response).to have_http_status(:ok)
+      expect(response.media_type).to eq('text/csv')
+    end
+
+    it '支払う人・受け取る人・金額のみの単一の表としてCSVに出力する' do
+      subject
+      expect(response.body).to eq("支払う人,受け取る人,金額\n鈴木,田中,1000\n")
+    end
+  end
 end

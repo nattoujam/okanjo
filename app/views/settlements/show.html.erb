@@ -59,4 +59,14 @@
     </ul>
   </section>
 
+  <div class="flex flex-col gap-2 mb-6">
+    <%= link_to "立替払い一覧をダウンロード",
+          group_settlements_payments_csv_path(@group.token),
+          class: "btn-secondary text-center",
+          data: { turbo: false } %>
+    <%= link_to "精算結果をダウンロード",
+          group_settlements_results_csv_path(@group.token, algo: @algo),
+          class: "btn-secondary text-center",
+          data: { turbo: false } %>
+  </div>
 </div>
