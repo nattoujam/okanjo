@@ -9,16 +9,23 @@
   <div class="mb-5">
     <p class="text-xs text-content-3 mb-2">精算アルゴリズム</p>
     <div class="flex text-sm rounded-lg border border-line overflow-hidden w-fit">
-      <%= link_to "支払い回数を最小化",
-            group_settlements_path(@group.token, algo: "optimal"),
-            class: "px-4 py-1.5 #{@algo == 'optimal' ? 'bg-surface-inverse text-on-inverse' : 'bg-surface text-content-2 hover:bg-surface-sunken'}",
-            data: { turbo_prefetch: false } %>
+      <% if @selectable_algos.include?("optimal") %>
+        <%= link_to "支払い回数を最小化",
+              group_settlements_path(@group.token, algo: "optimal"),
+              class: "px-4 py-1.5 #{@algo == 'optimal' ? 'bg-surface-inverse text-on-inverse' : 'bg-surface text-content-2 hover:bg-surface-sunken'}",
+              data: { turbo_prefetch: false } %>
+      <% else %>
+        <span class="px-4 py-1.5 bg-surface-sunken text-content-4 cursor-not-allowed">支払い回数を最小化</span>
+      <% end %>
       <div class="w-px bg-line"></div>
       <%= link_to "シンプルに計算",
             group_settlements_path(@group.token, algo: "greedy"),
             class: "px-4 py-1.5 #{@algo == 'greedy' ? 'bg-surface-inverse text-on-inverse' : 'bg-surface text-content-2 hover:bg-surface-sunken'}",
             data: { turbo_prefetch: false } %>
     </div>
+    <% unless @selectable_algos.include?("optimal") %>
+      <p class="text-xs text-content-3 mt-2">「支払い回数を最小化」は不具合対応のため一時的に選べません</p>
+    <% end %>
   </div>
 
   <% if @repayments.empty? %>

@@ -50,6 +50,23 @@ RSpec.describe SettlementsController, type: :request do
       end
     end
 
+    context 'algo=optimalを指定した場合' do
+      it 'Optimalを使わずgreedyで計算する' do
+        expect(RepaymentStrategies::Optimal).not_to receive(:new)
+
+        get group_settlements_path(group.token, algo: 'optimal')
+
+        expect(response).to have_http_status(:ok)
+      end
+
+      it 'optimalへの切り替えリンクを表示しない' do
+        get group_settlements_path(group.token, algo: 'optimal')
+
+        expect(response.body).not_to include('algo=optimal')
+        expect(response.body).to include('一時的に選べません')
+      end
+    end
+
     context '存在しないtokenの場合' do
       it '404を返す' do
         get group_settlements_path('nonexistent')
