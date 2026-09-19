@@ -299,5 +299,74 @@ RSpec.describe RepaymentsCalculator do
         expect(subject[suzuki.id]).to eq(-1000)
       end
     end
+
+    context '割り切れない場合' do
+      # 1000円を3人で割ると333.33...円
+      # 割り勘対象者は四捨五入した333円、端数は立替者の田中が引き受けて334円負担
+      before do
+        create(:payment, group: group, payer: tanaka, amount: 1000,
+               participants: [ tanaka, suzuki, sato ])
+      end
+
+      it '端数を立替者が引き受ける' do
+        expect(subject[tanaka.id]).to eq(666)
+        expect(subject[suzuki.id]).to eq(-333)
+        expect(subject[sato.id]).to eq(-333)
+        expect(subject.values.sum).to eq(0)
+      end
+    end
+
+    context '13人で割り切れない場合' do
+      # 11591円を13人で割ると891.61...円
+      # 割り勘対象者は全員892円、端数の5円は立替者の田中が引き受けて887円負担
+      let(:others) { create_list(:member, 12, group: group) }
+
+      before do
+        create(:payment, group: group, payer: tanaka, amount: 11591,
+               participants: [ tanaka ] + others)
+      end
+
+      it '割り勘対象者は全員同額で、端数を立替者が引き受ける' do
+        expect(others.map { |m| subject[m.id] }).to all(eq(-892))
+        expect(subject[tanaka.id]).to eq(11591 - 887)
+        expect(subject.values.sum).to eq(0)
+      end
+    end
+
+    context '同じ割り勘対象者への立替が複数ある場合' do
+      # 100円(33.33...円ずつ)の立替が3件。
+      # 支払いごとに丸めると田中が1円ずつ計3円の端数を被るが、
+      # 負担額を合算してから丸めるので3人ちょうど100円ずつになり端数が出ない
+      before do
+        3.times do
+          create(:payment, group: group, payer: tanaka, amount: 100,
+                 participants: [ tanaka, suzuki, sato ])
+        end
+      end
+
+      it '端数が合算され立替者の負担が増えない' do
+        expect(subject[tanaka.id]).to eq(200)
+        expect(subject[suzuki.id]).to eq(-100)
+        expect(subject[sato.id]).to eq(-100)
+      end
+    end
+
+    context '割り勘対象者の構成が異なる立替が混在する場合' do
+      # 田中100円(3人: 33.33...) + 鈴木100円(3人: 33.33...) + 田中100円(2人: 50)
+      # 負担額は田中116.66... 鈴木116.66... 佐藤66.66...
+      # 四捨五入すると合計が1円超過するため、立替額が多い田中が端数を引き受けて116円負担
+      before do
+        create(:payment, group: group, payer: tanaka, amount: 100, participants: [ tanaka, suzuki, sato ])
+        create(:payment, group: group, payer: suzuki, amount: 100, participants: [ tanaka, suzuki, sato ])
+        create(:payment, group: group, payer: tanaka, amount: 100, participants: [ tanaka, suzuki ])
+      end
+
+      it '構成が違っても合算し、立替額が多い立替者が端数を引き受ける' do
+        expect(subject[tanaka.id]).to eq(200 - 116)
+        expect(subject[suzuki.id]).to eq(100 - 117)
+        expect(subject[sato.id]).to eq(-67)
+        expect(subject.values.sum).to eq(0)
+      end
+    end
   end
 end
