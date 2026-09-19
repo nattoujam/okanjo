@@ -13,11 +13,13 @@ class PaymentsController < ApplicationController
     @payment = @group.payments.build(payment_params)
     @payment.category = resolve_category
 
-    if @payment.save
-      redirect_to group_show_path(@group.token)
-    else
-      render :new, status: :unprocessable_content
+    ActiveRecord::Base.transaction do
+      @payment.save!
+      record_activity("payment.create", after: @payment.audit_snapshot)
     end
+    redirect_to group_show_path(@group.token)
+  rescue ActiveRecord::RecordInvalid
+    render :new, status: :unprocessable_content
   end
 
   def edit
@@ -25,7 +27,10 @@ class PaymentsController < ApplicationController
   end
 
   def destroy
-    @payment.destroy
+    ActiveRecord::Base.transaction do
+      record_activity("payment.destroy", before: @payment.audit_snapshot)
+      @payment.destroy!
+    end
     redirect_to group_show_path(@group.token)
   end
 
@@ -38,10 +43,13 @@ class PaymentsController < ApplicationController
       return
     end
 
+    before = @payment.audit_snapshot
     ActiveRecord::Base.transaction do
       @payment.update!(payment_base_params.merge(category: resolve_category))
       @payment.payment_participants.destroy_all
       member_ids.each { |id| @payment.payment_participants.create!(member_id: id) }
+      # participants の through 関連は before の取得時にキャッシュされているので DB から取り直す
+      record_activity("payment.update", before: before, after: @payment.reload.audit_snapshot)
     end
     redirect_to group_show_path(@group.token)
   rescue ActiveRecord::RecordInvalid
@@ -56,6 +64,10 @@ class PaymentsController < ApplicationController
 
   def set_payment
     @payment = @group.payments.find(params[:id])
+  end
+
+  def record_activity(action, before: nil, after: nil)
+    ActivityLog.record(group: @group, action:, subject: @payment, before:, after:)
   end
 
   # 新規ビルドしたカテゴリは belongs_to の autosave に任せる。

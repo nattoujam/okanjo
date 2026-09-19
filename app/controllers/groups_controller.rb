@@ -8,11 +8,15 @@ class GroupsController < ApplicationController
   def create
     @group = Group.new(group_params)
 
-    if @group.save
-      redirect_to group_show_path(@group.token)
-    else
-      render :new, status: :unprocessable_entity
+    ActiveRecord::Base.transaction do
+      @group.save!
+      @group.members.each do |member|
+        ActivityLog.record(group: @group, action: "member.create", subject: member, after: member.audit_snapshot)
+      end
     end
+    redirect_to group_show_path(@group.token)
+  rescue ActiveRecord::RecordInvalid
+    render :new, status: :unprocessable_entity
   end
 
   def show

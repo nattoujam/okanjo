@@ -19,6 +19,18 @@ class Payment < ApplicationRecord
     amount - personal_amount
   end
 
+  # 監査ログ用。メンバーやカテゴリが後から消えても読めるよう、ID ではなく名前で持つ
+  def audit_snapshot
+    {
+      description: description,
+      amount: amount,
+      personal_amount: personal_amount,
+      payer: payer.name,
+      category: category&.name,
+      participants: participants.map(&:name)
+    }
+  end
+
   private
 
   def participants_must_exist

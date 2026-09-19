@@ -41,6 +41,12 @@ RSpec.describe PaymentsController, type: :request do
         expect { subject }.to change(Payment, :count).by(1)
       end
 
+      it 'payment.create を記録する' do
+        expect { subject }.to change(ActivityLog, :count).by(1)
+        expect(ActivityLog.last).to have_attributes(group: group, action: 'payment.create', subject: Payment.last, before: nil)
+        expect(ActivityLog.last.after).to include('description' => 'ランチ代', 'amount' => 3600, 'payer' => '田中', 'participants' => [ '田中' ])
+      end
+
       it 'グループ詳細画面にリダイレクトする' do
         subject
         expect(response).to redirect_to(group_show_path(group.token))
@@ -61,6 +67,10 @@ RSpec.describe PaymentsController, type: :request do
 
       it '立替払いを作成しない' do
         expect { subject }.not_to change(Payment, :count)
+      end
+
+      it 'ログも記録しない' do
+        expect { subject }.not_to change(ActivityLog, :count)
       end
 
       it 'newをレンダリングして422を返す' do
@@ -244,6 +254,14 @@ RSpec.describe PaymentsController, type: :request do
         expect(payment.reload.amount).to eq(5000)
       end
 
+      it 'payment.update を before/after 付きで記録する' do
+        expect { subject }.to change(ActivityLog, :count).by(1)
+        log = ActivityLog.last
+        expect(log).to have_attributes(action: 'payment.update', subject: payment)
+        expect(log.before).to include('description' => 'ランチ代', 'amount' => 3600)
+        expect(log.after).to include('description' => '夕食代', 'amount' => 5000)
+      end
+
       it 'グループ詳細画面にリダイレクトする' do
         subject
         expect(response).to redirect_to(group_show_path(group.token))
@@ -362,6 +380,12 @@ RSpec.describe PaymentsController, type: :request do
 
     it '立替払いを削除する' do
       expect { subject }.to change(Payment, :count).by(-1)
+    end
+
+    it 'payment.destroy を記録する' do
+      expect { subject }.to change(ActivityLog, :count).by(1)
+      expect(ActivityLog.last).to have_attributes(action: 'payment.destroy', subject_id: payment.id, after: nil)
+      expect(ActivityLog.last.before).to include('payer' => '田中')
     end
 
     it 'グループ詳細画面にリダイレクトする' do

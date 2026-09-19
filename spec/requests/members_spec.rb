@@ -13,6 +13,11 @@ RSpec.describe MembersController, type: :request do
         expect { subject }.to change(Member, :count).by(1)
       end
 
+      it 'member.create を記録する' do
+        expect { subject }.to change(ActivityLog, :count).by(1)
+        expect(ActivityLog.last).to have_attributes(group: group, action: 'member.create', subject: Member.last, after: { 'name' => '田中' })
+      end
+
       it 'グループ詳細画面にリダイレクトする' do
         subject
         expect(response).to redirect_to(group_show_path(group.token))
@@ -24,6 +29,10 @@ RSpec.describe MembersController, type: :request do
 
       it 'メンバーを作成しない' do
         expect { subject }.not_to change(Member, :count)
+      end
+
+      it 'ログも記録しない' do
+        expect { subject }.not_to change(ActivityLog, :count)
       end
 
       it 'グループ詳細画面にリダイレクトする' do
@@ -40,6 +49,11 @@ RSpec.describe MembersController, type: :request do
 
     it 'メンバーを削除する' do
       expect { subject }.to change(Member, :count).by(-1)
+    end
+
+    it 'member.destroy を記録する' do
+      expect { subject }.to change(ActivityLog, :count).by(1)
+      expect(ActivityLog.last).to have_attributes(action: 'member.destroy', subject_id: member.id)
     end
 
     it 'グループ詳細画面にリダイレクトする' do

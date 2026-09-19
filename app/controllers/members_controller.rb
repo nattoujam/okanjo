@@ -4,15 +4,17 @@ class MembersController < ApplicationController
   def create
     @member = @group.members.build(member_params)
 
-    if @member.save
-      redirect_to group_show_path(@group.token)
-    else
-      redirect_to group_show_path(@group.token), alert: @member.errors.full_messages.to_sentence
+    ActiveRecord::Base.transaction do
+      @member.save!
+      ActivityLog.record(group: @group, action: "member.create", subject: @member, after: @member.audit_snapshot)
     end
+    redirect_to group_show_path(@group.token)
+  rescue ActiveRecord::RecordInvalid
+    redirect_to group_show_path(@group.token), alert: @member.errors.full_messages.to_sentence
   end
 
   def destroy
-    @group.members.find(params[:id]).destroy
+    MemberRemover.new(@group.members.find(params[:id])).call
     redirect_to group_show_path(@group.token)
   end
 
