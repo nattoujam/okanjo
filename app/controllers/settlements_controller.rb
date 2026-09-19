@@ -4,14 +4,8 @@ class SettlementsController < ApplicationController
     "optimal" => RepaymentStrategies::Optimal
   }.freeze
 
-  # optimal は探索量が人数に対して階乗オーダーで増え、13人規模でもリクエストが返らなくなる。
-  # 恒久修正までの暫定措置として選択不可にしている。
-  SELECTABLE_ALGOS = %w[greedy].freeze
-  DEFAULT_ALGO     = "greedy"
-
   def show
     @algo = normalize_algo(params[:algo])
-    @selectable_algos = SELECTABLE_ALGOS
 
     # group + members + payments を常にロード（キャッシュキー生成に必要）
     @group = Group.includes(:members, :payments).find_by!(token: params[:token])
@@ -59,7 +53,7 @@ class SettlementsController < ApplicationController
   private
 
   def normalize_algo(algo)
-    SELECTABLE_ALGOS.include?(algo) ? algo : DEFAULT_ALGO
+    REPAYMENT_STRATEGIES.key?(algo) ? algo : "optimal"
   end
 
   def sanitized_group_name(group)
