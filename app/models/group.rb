@@ -2,6 +2,7 @@ class Group < ApplicationRecord
   has_many :members, dependent: :destroy
   has_many :payments, dependent: :destroy
   has_many :payment_categories, -> { order(:sequence) }, dependent: :destroy
+  has_many :activity_logs, dependent: :delete_all
 
   accepts_nested_attributes_for :members, reject_if: :all_blank
 

@@ -5,4 +5,8 @@ class Member < ApplicationRecord
   has_many :paid_payments, class_name: "Payment", foreign_key: :payer_member_id, dependent: :destroy
 
   validates :name, presence: true
+
+  def audit_snapshot
+    { name: name }
+  end
 end

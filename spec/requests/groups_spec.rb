@@ -40,6 +40,11 @@ RSpec.describe GroupsController, type: :request do
       it 'グループとメンバーを作成する' do
         expect { subject }.to change(Group, :count).by(1).and change(Member, :count).by(2)
       end
+
+      it '初期メンバーごとに member.create を記録する' do
+        expect { subject }.to change(ActivityLog, :count).by(2)
+        expect(Group.last.activity_logs.map { |log| log.after['name'] }).to contain_exactly('田中', '鈴木')
+      end
     end
 
     context '無効なパラメータの場合' do

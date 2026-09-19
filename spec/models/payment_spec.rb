@@ -1,6 +1,29 @@
 require 'rails_helper'
 
 RSpec.describe Payment, type: :model do
+  describe '#audit_snapshot' do
+    let(:group) { create(:group) }
+    let(:tanaka) { create(:member, group: group, name: '田中') }
+    let(:suzuki) { create(:member, group: group, name: '鈴木') }
+    let(:category) { create(:payment_category, group: group, name: '1日目') }
+
+    subject do
+      create(:payment, group: group, payer: tanaka, category: category, participants: [ tanaka, suzuki ],
+                       description: 'ランチ代', amount: 3600, personal_amount: 600).audit_snapshot
+    end
+
+    it 'IDではなく名前で持つ' do
+      is_expected.to eq(
+        description: 'ランチ代', amount: 3600, personal_amount: 600,
+        payer: '田中', category: '1日目', participants: [ '田中', '鈴木' ]
+      )
+    end
+
+    it 'カテゴリが無ければ nil' do
+      expect(create(:payment, :with_participant, group: group, payer: tanaka).audit_snapshot[:category]).to be_nil
+    end
+  end
+
   describe 'validations' do
     it_behaves_like :required_string_column, :description, traits: [ :with_participant ]
     it_behaves_like :integer_column, :amount, min: 1, traits: [ :with_participant ]

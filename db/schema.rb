@@ -10,7 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_07_161814) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_19_000000) do
+  create_table "activity_logs", force: :cascade do |t|
+    t.string "action", null: false
+    t.json "after"
+    t.json "before"
+    t.datetime "created_at", null: false
+    t.integer "group_id", null: false
+    t.bigint "subject_id", null: false
+    t.string "subject_type", null: false
+    t.index ["group_id", "created_at"], name: "index_activity_logs_on_group_id_and_created_at"
+  end
+
   create_table "groups", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "memo"
@@ -60,6 +71,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_07_161814) do
     t.index ["payment_category_id"], name: "index_payments_on_payment_category_id"
   end
 
+  add_foreign_key "activity_logs", "groups"
   add_foreign_key "members", "groups"
   add_foreign_key "payment_categories", "groups"
   add_foreign_key "payment_participants", "members"
