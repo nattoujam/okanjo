@@ -9,6 +9,10 @@ class SettlementsController < ApplicationController
   SELECTABLE_ALGOS = %w[greedy].freeze
   DEFAULT_ALGO     = "greedy"
 
+  # 精算結果のキャッシュは solid_cache（永続DB）に入るためデプロイしても消えない。
+  # 計算結果が変わる修正を入れたときはここを上げて古いキャッシュを捨てる。
+  CACHE_VERSION = "v2".freeze
+
   def show
     @algo = normalize_algo(params[:algo])
     @selectable_algos = SELECTABLE_ALGOS
@@ -70,10 +74,17 @@ class SettlementsController < ApplicationController
     send_data csv_string, type: "text/csv; charset=UTF-8", filename: filename, disposition: "attachment"
   end
 
+  # 最終更新時刻だけだと、最新でない立替を削除したときにキーが変わらず古い精算結果を返す。
+  # 件数も含めて立替の増減を検知する。
+  def payments_cache_key(payments)
+    latest = payments.map(&:updated_at).max
+    "#{payments.size}-#{latest&.utc&.iso8601(6) || 0}"
+  end
+
   def calculate_settlement(group, algo)
-    payments_ts    = group.payments.map(&:updated_at).max&.to_i || 0
-    repayments_key = "settlements/#{group.token}/#{payments_ts}/#{algo}"
-    balances_key   = "settlements/#{group.token}/#{payments_ts}/balances"
+    payments_key   = payments_cache_key(group.payments)
+    repayments_key = "settlements/#{CACHE_VERSION}/#{group.token}/#{payments_key}/#{algo}"
+    balances_key   = "settlements/#{CACHE_VERSION}/#{group.token}/#{payments_key}/balances"
 
     raw_repayments = Rails.cache.read(repayments_key)
     raw_balances   = Rails.cache.read(balances_key)

@@ -75,6 +75,66 @@ RSpec.describe SettlementsController, type: :request do
     end
   end
 
+  describe 'GET /g/:token/settlements（キャッシュ更新）' do
+    let(:group) { create(:group) }
+    let!(:tanaka) { create(:member, group: group, name: '田中') }
+    let!(:suzuki) { create(:member, group: group, name: '鈴木') }
+
+    around do |example|
+      original = Rails.cache
+      Rails.cache = ActiveSupport::Cache::MemoryStore.new
+      example.run
+      Rails.cache = original
+    end
+
+    context '最新でない立替を削除した場合' do
+      let!(:old_payment) do
+        create(:payment, group: group, payer: tanaka, amount: 1000, participants: [ tanaka, suzuki ])
+      end
+
+      before do
+        create(:payment, group: group, payer: tanaka, amount: 2000, participants: [ tanaka, suzuki ])
+      end
+
+      it '削除を反映した精算結果を表示する' do
+        get group_settlements_path(group.token)
+        expect(response.body).to include('1,500円')
+
+        delete group_payment_path(group.token, old_payment)
+        get group_settlements_path(group.token)
+
+        expect(response.body).to include('1,000円')
+        expect(response.body).not_to include('1,500円')
+      end
+    end
+
+    context '割り勘対象者だけを変更した場合' do
+      let!(:sato) { create(:member, group: group, name: '佐藤') }
+      let!(:payment) do
+        create(:payment, group: group, payer: tanaka, description: 'ランチ代', amount: 3000,
+                         participants: [ tanaka, suzuki ])
+      end
+
+      it '変更を反映した精算結果を表示する' do
+        get group_settlements_path(group.token)
+        expect(response.body).to include('1,500円')
+
+        patch group_payment_path(group.token, payment), params: {
+          payment: {
+            payer_member_id: tanaka.id,
+            description: 'ランチ代',
+            amount: 3000,
+            member_ids: [ tanaka.id, suzuki.id, sato.id ]
+          }
+        }
+        get group_settlements_path(group.token)
+
+        expect(response.body).to include('1,000円')
+        expect(response.body).not_to include('1,500円')
+      end
+    end
+  end
+
   describe 'GET /g/:token/settlements/payments.csv' do
     let(:group) { create(:group) }
     let!(:tanaka) { create(:member, group: group, name: '田中') }
