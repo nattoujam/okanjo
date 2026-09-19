@@ -133,5 +133,36 @@ RSpec.describe RepaymentStrategies::Optimal do
         balances.each_key { |id| expect(net(result, id)).to eq(balances[id]) }
       end
     end
+
+    context '1人の債権者に対して同額の債務者が並ぶ場合(13人)' do
+      # 11591円を13人で割り勘した形。同額の債務者が並ぶと残高による絞り込みが効かない
+      it '一定時間内に完了し、取引数が債務者数(12件)と一致する' do
+        balances = { payer: 10704 }
+        12.times { |i| balances[:"m#{i}"] = -892 }
+
+        result = nil
+        elapsed = realtime { result = strategy.calculate(balances) }
+
+        expect(elapsed).to be < 5.0
+        expect(result.size).to eq(12)
+        balances.each_key { |id| expect(net(result, id)).to eq(balances[id]) }
+      end
+    end
+
+    context '厳密に解く人数の上限を超える場合' do
+      it '一定時間内に完了し、Greedyと同じ結果を返す' do
+        over_limit = described_class::MAX_EXACT_MEMBERS + 2
+        balances = {}
+        (over_limit / 2).times { |i| balances[:"c#{i}"] = 1000 }
+        (over_limit / 2).times { |i| balances[:"d#{i}"] = -1000 }
+
+        result = nil
+        elapsed = realtime { result = strategy.calculate(balances) }
+
+        expect(elapsed).to be < 5.0
+        expect(result).to eq(RepaymentStrategies::Greedy.new.calculate(balances))
+        balances.each_key { |id| expect(net(result, id)).to eq(balances[id]) }
+      end
+    end
   end
 end
